@@ -28,7 +28,7 @@ class StandardPositionFormatter extends BaseFormatter
 
             $attributesSnapshot = $node->getAttributesSnapshot();
             if (is_null($attributesSnapshot)) {
-                return
+                return;
             }
             $diffWidth = $node->getWidth() - $attributesSnapshot['width'];
             $width = $node->getWidth();
