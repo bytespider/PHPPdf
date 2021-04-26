@@ -20,10 +20,10 @@ use ZendPdf\Font as ZendFont;
 class Font extends AbstractFont
 {
     private $fonts = array();
-    
+
     /**
      * @internal Public method within PHPPdf\Core\Engine\ZF namespace
-     * 
+     *
      * @return ZendPdf\Resource\Font
      */
     public function getCurrentWrappedFont()
@@ -43,12 +43,12 @@ class Font extends AbstractFont
                     $name = $this->retrieveFontName($data);
                     $this->fonts[$style] = ZendFont::fontWithName($name);
                 }
-                else 
+                else
                 {
                     $this->fonts[$style] = ZendFont::fontWithPath($data);
                 }
             }
-            
+
             return $this->fonts[$style];
         }
         catch(\ZendPdf\Exception\ExceptionInterface $e)
@@ -56,12 +56,12 @@ class Font extends AbstractFont
             throw InvalidResourceException::invalidFontException($this->fontResources[$style], $e);
         }
     }
-    
+
     private function isNamedFont($fontData)
     {
         return strpos($fontData, '/') === false;
     }
-    
+
     private static function retrieveFontName($name)
     {
         $const = sprintf('ZendPdf\Font::FONT_%s', str_replace('-', '_', strtoupper($name)));
@@ -77,14 +77,14 @@ class Font extends AbstractFont
     public function getWidthOfText($text, $fontSize)
     {
         $chars = $this->convertTextToChars($text);
-        
+
         $glyphs = $this->getCurrentWrappedFont()->glyphNumbersForCharacters($chars);
         $widths = $this->getCurrentWrappedFont()->widthsForGlyphs($glyphs);
         $textWidth = (array_sum($widths) / $this->getCurrentWrappedFont()->getUnitsPerEm()) * $fontSize;
 
         return $textWidth;
     }
-    
+
     private function convertTextToChars($text)
     {
         $length = strlen($text);
@@ -98,10 +98,10 @@ class Font extends AbstractFont
                 $chars[] = $char;
             }
         }
-        
+
         return $chars;
     }
-    
+
     /**
      * code from http://php.net/manual/en/function.ord.php#78032
      */
@@ -114,7 +114,7 @@ class Font extends AbstractFont
 
         if ($index < $len)
         {
-            $h = ord($text{$index});
+            $h = ord($text[$index]);
 
             if($h <= 0x7F)
             {
@@ -128,27 +128,27 @@ class Font extends AbstractFont
             elseif ($h <= 0xDF && $index < $len - 1)
             {
                 $bytes = 2;
-                $char = ($h & 0x1F) <<  6 | (ord($text{$index + 1}) & 0x3F);
+                $char = ($h & 0x1F) <<  6 | (ord($text[$index + 1]) & 0x3F);
             }
             elseif($h <= 0xEF && $index < $len - 2)
             {
                 $bytes = 3;
-                $char = ($h & 0x0F) << 12 | (ord($text{$index + 1}) & 0x3F) << 6
-                                         | (ord($text{$index + 2}) & 0x3F);
+                $char = ($h & 0x0F) << 12 | (ord($text[$index + 1]) & 0x3F) << 6
+                                         | (ord($text[$index + 2]) & 0x3F);
             }
             elseif($h <= 0xF4 && $index < $len - 3)
             {
                 $bytes = 4;
-                $char = ($h & 0x0F) << 18 | (ord($text{$index + 1}) & 0x3F) << 12
-                                         | (ord($text{$index + 2}) & 0x3F) << 6
-                                         | (ord($text{$index + 3}) & 0x3F);
+                $char = ($h & 0x0F) << 18 | (ord($text[$index + 1]) & 0x3F) << 12
+                                         | (ord($text[$index + 2]) & 0x3F) << 6
+                                         | (ord($text[$index + 3]) & 0x3F);
             }
         }
 
 
         return array($char, $bytes);
     }
-    
+
     public function getCurrentResourceIdentifier()
     {
         return isset($this->fontResources[$this->currentStyle]) ? $this->fontResources[$this->currentStyle] : $this->fontResources[self::STYLE_NORMAL];
