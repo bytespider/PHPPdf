@@ -17,7 +17,7 @@
         }
     ],
     "require": {
-        "nmiles/laminas-pdf":  "~2.0.0",
+        "zendframework/zendpdf":  "~2.0.0",
         "laminas/laminas-cache":  "^2.0"
     },
     "require-dev": {
@@ -27,8 +27,8 @@
         "phpunit/phpunit": ">=4,<5.4.0"
     },
     "suggest": {
-    	"laminas/laminas-barcode":  "If you want to use barcodes",
-    	"laminas/laminas-validator": "If you want to use barcodes (required by zend-barcode)",
+    	"laminas/laminas-barcodee":  "If you want to use barcodes",
+    	"laminas/laminas-cache": "If you want to use barcodes (required by zend-barcode)",
     	"imagine/imagine": "If you want to use image generating (required version: >=v0.2.6)"
     },
     "autoload": {
