@@ -8,30 +8,30 @@ use PHPPdf\Parser\XmlParser as AbstractXmlParser;
 class XmlParserTest extends TestCase
 {
     private $parser;
-    
-    public function setUp()
+
+    public function setUp(): void
     {
         $this->parser = new XmlParser();
     }
-    
+
     /**
      * @test
-     * @expectedException \PHPPdf\Parser\Exception\ParseException
      */
     public function parse_throwExceptionWhenFileNotExists()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $this->parser->parse(__DIR__.'/unexistedfile');
     }
-    
+
     /**
      * @test
-     * @expectedException \PHPPdf\Parser\Exception\ParseException
      */
     public function parse_throwExceptionWhenFileIsNotValidXml()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $this->parser->parse(__FILE__);
     }
-    
+
     /**
      * @test
      */
@@ -44,7 +44,7 @@ class XmlParserTest extends TestCase
 class XmlParser extends AbstractXmlParser
 {
     const ROOT_TAG = 'root';
-    
+
     protected function createRoot()
     {
         return array();

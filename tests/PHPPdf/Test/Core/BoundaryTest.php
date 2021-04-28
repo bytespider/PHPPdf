@@ -9,7 +9,7 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $boundary;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->boundary = new Boundary();
     }
@@ -31,20 +31,20 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\LogicException
      */
     public function invalidCreation()
     {
+        $this->expectException(\PHPPdf\Exception\LogicException::class);
         $this->boundary->setNext(10, 10);
         $this->boundary->close();
     }
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\LogicException
      */
     public function invalidStateException()
     {
+        $this->expectException(\PHPPdf\Exception\LogicException::class);
         $this->boundary->setNext(10, 10)
                        ->setNext(20, 10)
                        ->setNext(20, 5)
@@ -98,7 +98,7 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
         }
         $this->assertEquals($old[0]->translate(1, 1), $this->boundary[0]);
     }
-    
+
     /**
      * @test
      * @dataProvider pointsProvider
@@ -107,23 +107,23 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $maxX = -(PHP_INT_MAX - 1);
         $minY = PHP_INT_MAX;
-        
+
         foreach($points as $point)
         {
             $this->boundary->setNext($point[0], $point[1]);
-            
+
             $maxX = max($maxX, $point[0]);
             $minY = min($minY, $point[1]);
         }
-        
+
         $diagonalPoint = $this->boundary->getDiagonalPoint();
-        
+
         $this->assertEquals($maxX, $diagonalPoint->getX());
         $this->assertEquals($minY, $diagonalPoint->getY());
 
         $this->assertEquals($points[0], $this->boundary->getFirstPoint()->toArray());
     }
-    
+
     public function pointsProvider()
     {
         return array(
@@ -163,10 +163,10 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\OutOfBoundsException
      */
     public function arrayAccessInvalidIndex()
     {
+        $this->expectException(\PHPPdf\Exception\OutOfBoundsException::class);
         $this->boundary->setNext(10, 10)
                ->setNext(20, 10);
 
@@ -175,16 +175,16 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\BadMethodCallException
      */
     public function arrayAccessInvalidOperation()
     {
+        $this->expectException(\PHPPdf\Exception\BadMethodCallException::class);
         $this->boundary->setNext(10, 10)
                ->setNext(20, 10);
 
         $this->boundary[2] = 123;
     }
-    
+
     /**
      * @test
      */
@@ -199,28 +199,28 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->assertTrue($this->boundary->intersects($this->boundary));
 
         $clone = clone $this->boundary;
-        
+
         $clone->pointTranslate(2, 0, 100);
         $clone->pointTranslate(3, 0, 100);
-        
+
         $clone->translate(99, 0);
         $this->assertTrue($this->boundary->intersects($clone));
         $this->assertTrue($clone->intersects($this->boundary));
-        
+
         $clone->translate(-19, 0);
         $this->assertTrue($this->boundary->intersects($clone));
         $this->assertTrue($clone->intersects($this->boundary));
-        
+
         $clone->translate(21, 0);
         $this->assertFalse($this->boundary->intersects($clone));
         $this->assertFalse($clone->intersects($this->boundary));
 
         $clone->translate(-50, -20);
-        
+
         $this->assertTrue($this->boundary->intersects($clone));
         $this->assertTrue($clone->intersects($this->boundary));
     }
-    
+
     /**
      * @test
      */
@@ -237,11 +237,11 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
                        ->setNext(190, 50)
                        ->setNext(99, 50)
                        ->close();
-                       
+
         $this->assertTrue($this->boundary->intersects($secondBoundary));
         $this->assertTrue($secondBoundary->intersects($this->boundary));
     }
-    
+
     /**
      * @test
      */
@@ -252,11 +252,11 @@ class BoundaryTest extends \PHPPdf\PHPUnit\Framework\TestCase
                        ->setNext(100, 0)
                        ->setNext(0, 0)
                        ->close();
-                       
+
         $this->assertEquals(array(50, 50), $this->boundary->getMiddlePoint()->toArray());
-        
+
         $this->boundary->translate(50, 50);
-        
-        $this->assertEquals(array(100, 0), $this->boundary->getMiddlePoint()->toArray());        
+
+        $this->assertEquals(array(100, 0), $this->boundary->getMiddlePoint()->toArray());
     }
 }

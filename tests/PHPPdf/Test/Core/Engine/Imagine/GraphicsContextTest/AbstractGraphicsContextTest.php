@@ -35,7 +35,7 @@ abstract class AbstractGraphicsContextTest extends TestCase
      */
     protected $gcImage;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->imagine = new Imagine();
         $this->gcImage = $this->imagine->create(new Box(self::GC_WIDTH, self::GC_HEIGHT), new Color(self::GC_COLOR));
@@ -77,7 +77,7 @@ class AbstractGraphicsContextTest_ImageAssert
 
         for($i=0; $i<3; $i++)
         {
-            \PHPUnit_Framework_Assert::assertLessThanOrEqual(
+            \PHPUnit\Framework\Assert::assertLessThanOrEqual(
                 255*0.03,//3% precision
                 abs($actualRgb[$i] - $expectedRgb[$i]),
                 'expected color: '.$expectedColor.', but given: '.$actualColor

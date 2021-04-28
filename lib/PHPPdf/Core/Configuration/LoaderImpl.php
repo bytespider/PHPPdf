@@ -20,9 +20,9 @@ use PHPPdf\Cache\Cache;
 
 /**
  * Standard configuration loader.
- * 
+ *
  * Loads configuration from xml files.
- * 
+ *
  * @author Piotr Śliwa <peter.pl7@gmail.com>
  */
 class LoaderImpl implements Loader
@@ -31,49 +31,54 @@ class LoaderImpl implements Loader
     private $complexAttributeFile = null;
     private $fontFiles = null;
     private $colorFile = null;
-    
+
     private $complexAttributeFactory;
     private $nodeFactory;
     private $fontRegistries = array();
     private $colorPalette;
-    
+
     private $unitConverter;
-    
+
     private $cache;
-    
+
+    public const DEFAULT_NODE_FILE = __DIR__.'/../../Resources/config/nodes.xml';
+    public const DEFAULT_COMPLEX_ATTRIBUTE_FILE = __DIR__.'/../../Resources/config/complex-attributes.xml';
+    public const DEFAULT_FONT_FILES = [
+        'pdf' => __DIR__.'/../../Resources/config/fonts.xml',
+        'image' => __DIR__.'/../../Resources/config/fonts-image.xml',
+    ];
+    public const DEFAULT_COLOR_FILE = __DIR__.'/../../Resources/config/colors.xml';
+
     public function __construct($nodeFile = null, $complexAttributeFile = null, $fontFiles = null, $colorFile = null)
     {
         if($nodeFile === null)
         {
-            $nodeFile = __DIR__.'/../../Resources/config/nodes.xml';
+            $nodeFile = static::DEFAULT_NODE_FILE;
         }
-        
+
         if($complexAttributeFile === null)
         {
-            $complexAttributeFile = __DIR__.'/../../Resources/config/complex-attributes.xml';
+            $complexAttributeFile = static::DEFAULT_COMPLEX_ATTRIBUTE_FILE;
         }
-        
+
         if(!$fontFiles)
         {
-            $fontFiles = array(
-                'pdf' => __DIR__.'/../../Resources/config/fonts.xml',
-                'image' => __DIR__.'/../../Resources/config/fonts-image.xml',
-            );
+            $fontFiles = static::DEFAULT_FONT_FILES;
         }
-        
+
         if($colorFile === null)
         {
-            $colorFile = __DIR__.'/../../Resources/config/colors.xml';
+            $colorFile = static::DEFAULT_COLOR_FILE;
         }
-        
-        $this->nodeFile = $nodeFile;        
-        $this->complexAttributeFile = $complexAttributeFile;        
+
+        $this->nodeFile = $nodeFile;
+        $this->complexAttributeFile = $complexAttributeFile;
         $this->setFontFile($fontFiles);
         $this->colorFile = $colorFile;
 
         $this->setCache(NullCache::getInstance());
     }
-    
+
     public function setNodeFile($nodeFile)
 	{
 		$this->nodeFile = $nodeFile;
@@ -93,7 +98,7 @@ class LoaderImpl implements Loader
                 'image' => $fontFile,
             );
         }
-	    
+
 		$this->fontFiles = $fontFile;
 	}
 
@@ -117,7 +122,7 @@ class LoaderImpl implements Loader
         if($this->complexAttributeFactory === null)
         {
             $this->complexAttributeFactory = $this->loadComplexAttributes();
-        }        
+        }
 
         return $this->complexAttributeFactory;
     }
@@ -127,10 +132,10 @@ class LoaderImpl implements Loader
         if(!isset($this->fontRegistries[$engine]))
         {
             $this->fontRegistries[$engine] = $this->loadFonts($engine);
-        }        
+        }
 
         return $this->fontRegistries[$engine];
-        
+
     }
 
 	public function createNodeFactory()
@@ -138,7 +143,7 @@ class LoaderImpl implements Loader
         if($this->nodeFactory === null)
         {
             $this->nodeFactory = $this->loadNodes();
-        }        
+        }
 
         return $this->nodeFactory;
     }
@@ -170,7 +175,7 @@ class LoaderImpl implements Loader
             $page = $nodeFactory->create('page');
             $nodeFactory->getPrototype('dynamic-page')->setPrototypePage($page);
         }
-        
+
         return $nodeFactory;
     }
 
@@ -223,7 +228,7 @@ class LoaderImpl implements Loader
         {
             throw new InvalidArgumentException(sprintf('Font file for engine "%s" is not defined.', $engine));
         }
-        
+
         $file = $this->fontFiles[$engine];
 
         $doLoadFonts = function($content)
@@ -236,17 +241,17 @@ class LoaderImpl implements Loader
 
         return $this->getFromCacheOrCallClosure($file, $doLoadFonts);
     }
-    
+
     public function createColorPalette()
     {
         if($this->colorPalette === null)
         {
             $this->colorPalette = $this->loadColorPalette();
-        }        
+        }
 
         return $this->colorPalette;
     }
-    
+
     private function loadColorPalette()
     {
         $file = $this->colorFile;
@@ -254,10 +259,10 @@ class LoaderImpl implements Loader
         $doLoadColorPalette = function($content)
         {
             $colorPaletteParser = new ColorPaletteParser();
-            
+
             return $colorPaletteParser->parse($content);
         };
 
         return $this->getFromCacheOrCallClosure($file, $doLoadColorPalette);
-    }    
+    }
 }

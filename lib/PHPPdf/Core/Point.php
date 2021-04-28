@@ -21,7 +21,7 @@ use PHPPdf\Exception\OutOfBoundsException;
 final class Point implements \ArrayAccess
 {
     private static $zero;
-    
+
     private $x;
     private $y;
 
@@ -33,7 +33,7 @@ final class Point implements \ArrayAccess
 
     /**
      * Factory method
-     * 
+     *
      * @return Point
      */
     public static function getInstance($x, $y)
@@ -44,13 +44,13 @@ final class Point implements \ArrayAccess
             {
                 self::$zero = new self(0, 0);
             }
-            
+
             return self::$zero;
         }
 
         return new self($x, $y);
     }
-    
+
     public function isZero()
     {
         return $this === self::$zero;
@@ -65,30 +65,30 @@ final class Point implements \ArrayAccess
     {
         return $this->y;
     }
-    
+
     /**
      * Compares y coord in given precision
-     * 
+     *
      * @param Point $point Point to compare
      * @param integer $precision Precision of comparision
-     * 
+     *
      * @return integer Positive number if y coord of owner is greater, 0 if values are equal or negative integer if owner is less
      */
     public function compareYCoord(Point $point, $precision = 1000)
     {
         return $this->compare($this->y, $point->y, $precision);
     }
-    
+
     private function compare($firstNumber, $secondNumber, $precision)
     {
         if($firstNumber === $secondNumber)
         {
             return 0;
         }
-        
+
         $firstNumberAsInteger = $this->convertToInteger($firstNumber, $precision);
         $secondNumberAsInteger = $this->convertToInteger($secondNumber, $precision);
-        
+
         if($firstNumberAsInteger > $secondNumberAsInteger)
         {
             return 1;
@@ -97,21 +97,22 @@ final class Point implements \ArrayAccess
         {
             return 0;
         }
-        
+
         return -1;
     }
-    
+
     private function convertToInteger($double, $precision)
     {
+        $double = (float)$double;
         return (int) ($double * $precision);
     }
-    
+
     /**
      * Compares x coord in given precision
-     * 
+     *
      * @param Point $point Point to compare
      * @param integer $precision Precision of comparision
-     * 
+     *
      * @return integer Positive number if x coord of owner is greater, 0 if values are equal or negative integer if owner is less
      */
     public function compareXCoord(Point $point, $precision = 1000)

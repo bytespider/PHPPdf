@@ -17,9 +17,9 @@ class ImageTest extends TestCase
         {
             $imagine = new Imagine();
             $image = new Image(TEST_RESOURCES_DIR.'/domek.png', $imagine);
-            
+
             $imagineImage = $image->getWrappedImage();
-            
+
             $this->assertEquals($imagineImage->getSize()->getHeight(), $image->getOriginalHeight());
             $this->assertEquals($imagineImage->getSize()->getWidth(), $image->getOriginalWidth());
         }
@@ -35,20 +35,20 @@ class ImageTest extends TestCase
             }
         }
     }
-    
+
     /**
      * @test
-     * @expectedException PHPPdf\Exception\InvalidResourceException
      */
     public function throwExceptionOnUnexistedImage()
     {
+        $this->expectException(\PHPPdf\Exception\InvalidResourceException::class);
         try
         {
             $imagine = new Imagine();
             $image = new Image('some path', $imagine);
-            
+
             $image->getWrappedImage();
-            
+
         }
         catch(\Imagine\Exception\RuntimeException $e)
         {

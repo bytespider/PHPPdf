@@ -14,33 +14,33 @@ class BarcodeTest extends TestCase
     private $objectMother;
     private $gc;
     private $page;
-    
-    public function setUp()
+
+    public function setUp(): void
     {
         $this->barcode = new Barcode();
         $this->objectMother = new NodeObjectMother($this);
-        $this->gc = $this->getMock('PHPPdf\Core\Engine\GraphicsContext');
+        $this->gc = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
         $this->page = new Page();
         $this->invokeMethod($this->page, 'setGraphicsContext', array($this->gc));
         $this->barcode->setParent($this->page);
     }
-    
+
     /**
      * @test
      * @dataProvider drawBarcodeInGraphicsContextProvider
      */
     public function drawBarcodeInGraphicsContext($x, $y, $width, $height, $barHeight, $barcodeText, $drawText, $barcodeType, $fontType, $fontSize, $color, $withChecksum, $orientation, $barThinWidth, $barThickWidth, $factor)
-    {               
+    {
         $boundary = $this->objectMother->getBoundaryStub($x, $y, $width, $height);
         $this->invokeMethod($this->barcode, 'setBoundary', array($boundary));
-        $font = $this->getMock('PHPPdf\Core\Engine\Font');
+        $font = $this->getMockBuilder('PHPPdf\Core\Engine\Font')->getMock();
         $fontPath = 'path';
-        
+
         $document = $this->getMockBuilder('PHPPdf\Core\Document')
                          ->disableOriginalConstructor()
                          ->setMethods(array('getFont', 'getColorFromPalette'))
                          ->getMock();
-                         
+
         $document->expects($this->once())
                  ->method('getFont')
                  ->with($fontType)
@@ -49,7 +49,7 @@ class BarcodeTest extends TestCase
                  ->method('getColorFromPalette')
                  ->with($color)
                  ->will($this->returnValue($color));
-        
+
         $this->gc->expects($this->once())
                  ->method('drawBarcode')
                  ->with($x, $y, $this->validateByCallback(function($barcode, TestCase $test) use($barcodeText, $drawText, $barcodeType, $fontPath, $fontSize, $color, $barHeight, $withChecksum, $orientation, $barThinWidth, $barThickWidth, $factor){
@@ -58,7 +58,7 @@ class BarcodeTest extends TestCase
                      $test->assertEquals($barcodeText, $barcode->getText());
                      $test->assertEquals($fontPath, $barcode->getFont());
                      $test->assertEquals($fontSize, $barcode->getFontSize());
-                     $test->assertEquals(hexdec($color), $barcode->getForeColor());
+                     $test->assertEquals($color, '#' . dechex($barcode->getForeColor()));
                      $test->assertEquals($drawText, $barcode->getDrawText());
                      $test->assertEquals($barHeight, $barcode->getBarHeight());
                      $test->assertEquals($withChecksum, $barcode->getWithChecksum());
@@ -68,11 +68,11 @@ class BarcodeTest extends TestCase
                      $test->assertEquals($barThickWidth, $barcode->getBarThickWidth());
                      $test->assertEquals($factor, $barcode->getFactor());
                  }, $this));
-     
+
         $font->expects($this->once())
              ->method('getCurrentResourceIdentifier')
              ->will($this->returnValue($fontPath));
-                 
+
         $this->barcode->setAttribute('type', $barcodeType);
         $this->barcode->setAttribute('code', $barcodeText);
         $this->barcode->setAttribute('font-type', $fontType);
@@ -86,16 +86,16 @@ class BarcodeTest extends TestCase
         $this->barcode->setAttribute('bar-thin-width', $barThinWidth);
         $this->barcode->setAttribute('bar-thick-width', $barThickWidth);
         $this->barcode->setAttribute('factor', $factor);
-        
+
         $tasks = new DrawingTaskHeap();
         $this->barcode->collectOrderedDrawingTasks($document, $tasks);
-        
+
         foreach($tasks as $task)
         {
             $task->invoke();
         }
     }
-    
+
     public function drawBarcodeInGraphicsContextProvider()
     {
         return array(

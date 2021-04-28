@@ -20,7 +20,7 @@ class TextTest extends \PHPPdf\PHPUnit\Framework\TestCase
     const PAGE_WIDTH = 700;
     const PAGE_HEIGHT = 700;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->text = new Text('some text');
         $this->page = new Page(array(
@@ -70,7 +70,7 @@ class TextTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $oldText = $this->text->getText();
 
-        $this->text->add($text);        
+        $this->text->add($text);
         $this->text->preFormat($this->document);
 
         $this->assertEquals($oldText.$anotherText, $this->text->getText());
@@ -99,26 +99,26 @@ class TextTest extends \PHPPdf\PHPUnit\Framework\TestCase
             ),
         );
     }
-    
+
     /**
      * @test
-     */    
+     */
     public function useTextTransformatorToSettingText()
     {
         $textStub = 'some text';
-        
-        $transformator = $this->getMock('PHPPdf\Core\Node\TextTransformator', array('transform'));
+
+        $transformator = $this->getMockBuilder('PHPPdf\Core\Node\TextTransformator')->setMethods(array('transform'))->getMock();
         $transformator->expects($this->once())
                       ->method('transform')
                       ->will($this->returnValue($textStub));
-        
+
         $this->text->setTextTransformator($transformator);
-        
+
         $this->text->setText('ac');
-        
+
         $this->assertEquals($textStub, $this->text->getText());
     }
-    
+
     /**
      * @test
      * @dataProvider wordsSizesProvider
@@ -128,12 +128,12 @@ class TextTest extends \PHPPdf\PHPUnit\Framework\TestCase
         try
         {
             $this->text->setWordsSizes($words, $sizes);
-            
+
             if($expectedException)
             {
                 $this->fail('expected exception');
             }
-            
+
             $this->assertEquals($words, $this->text->getWords());
             $this->assertEquals($sizes, $this->text->getWordsSizes());
         }
@@ -145,7 +145,7 @@ class TextTest extends \PHPPdf\PHPUnit\Framework\TestCase
             }
         }
     }
-    
+
     public function wordsSizesProvider()
     {
         return array(
@@ -161,7 +161,7 @@ class TextTest extends \PHPPdf\PHPUnit\Framework\TestCase
             ),
         );
     }
-    
+
     /**
      * @test
      */
@@ -171,62 +171,62 @@ class TextTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $y = 15;
         $transX = 3;
         $transY = 5;
-        
+
         $this->text->addLineOfWords(array('word'), 10, Point::getInstance($x, $y));
-        
+
         $this->text->translate($transX, $transY);
-        
+
         list($point) = $this->text->getPointsOfWordsLines();
         $this->assertEquals(array($x+$transX, $y - $transY), $point->toArray());
     }
-    
+
     /**
      * @test
      */
     public function getDrawingTasksFromLineParts()
-    {       
+    {
         $documentStub = $this->createDocumentStub();
-        
+
         $tasks = new DrawingTaskHeap();
-        
+
         for($i=0; $i<3; $i++)
         {
             $linePart = $this->getMockBuilder('PHPPdf\Core\Node\Paragraph\LinePart')
                              ->setMethods(array('collectOrderedDrawingTasks'))
                              ->disableOriginalConstructor()
                              ->getMock();
-                             
+
             $linePart->expects($this->once())
                      ->method('collectOrderedDrawingTasks')
                      ->with($documentStub, $tasks);
-                     
+
             $this->text->addLinePart($linePart);
         }
-        
+
         $this->text->collectOrderedDrawingTasks($documentStub, $tasks);
     }
-    
+
     /**
      * @test
      */
     public function removeLinePart()
     {
         $text = new Text();
-        
+
         $linePart1 = $this->getMockBuilder('PHPPdf\Core\Node\Paragraph\LinePart')
                           ->disableOriginalConstructor()
                           ->getMock();
         $linePart2 = $this->getMockBuilder('PHPPdf\Core\Node\Paragraph\LinePart')
                           ->disableOriginalConstructor()
                           ->getMock();
-                          
+
         $text->addLinePart($linePart1);
         $text->addLinePart($linePart2);
-        
+
         $this->assertEquals(2, count($text->getLineParts()));
-        
+
         $text->removeLinePart($linePart1);
-        
+
         $this->assertEquals(1, count($text->getLineParts()));
         $text->removeLinePart($linePart1);
         $this->assertEquals(1, count($text->getLineParts()));

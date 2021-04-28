@@ -9,10 +9,10 @@ use PHPPdf\Core\Formatter\TextPositionFormatter,
 class TextPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     const TEXT_LINE_HEIGHT = 14;
-    
+
     private $formatter;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new TextPositionFormatter();
     }
@@ -29,28 +29,29 @@ class TextPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     private function getTextMock($lineSizes, $parentFirstPoint, $firstXCoord = null)
     {
-        $parentMock = $this->getMock('\PHPPdf\Core\Node\Node', array('getStartDrawingPoint'));
+        $parentMock = $this->getMockBuilder('\PHPPdf\Core\Node\Node')->setMethods(array('getStartDrawingPoint'))->getMock();
         $parentMock->expects($this->once())
                    ->method('getStartDrawingPoint')
                    ->will($this->returnValue(array(0, 700)));
 
-        $mock = $this->getMock('\PHPPdf\Core\Node\Text', array(
+        $mock = $this->getMockBuilder('\PHPPdf\Core\Node\Text')->setMethods(array(
             'getParent',
             'getLineHeightRecursively',
             'getLineSizes',
             'getStartDrawingPoint',
             'getBoundary',
-        ));
+        ))->getMock();
+
 
         $mock->expects($this->atLeastOnce())
              ->method('getParent')
              ->will($this->returnValue($parentMock));
 
-        $boundaryMock = $this->getMock('\PHPPdf\Core\Boundary', array(
+        $boundaryMock = $this->getMockBuilder('\PHPPdf\Core\Boundary')->setMethods(array(
             'getFirstPoint',
             'setNext',
             'close',
-        ));
+        ))->getMock();
 
         $firstXCoord = $firstXCoord ? $firstXCoord : $parentFirstPoint[0];
         $boundaryMock->expects($this->atLeastOnce())

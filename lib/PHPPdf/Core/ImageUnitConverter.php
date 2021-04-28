@@ -12,7 +12,7 @@ use PHPPdf\Exception\InvalidArgumentException;
 
 /**
  * Unit converter
- * 
+ *
  * Base unit of this converter is pixel
  *
  * @author Piotr Śliwa <peter.pl7@gmail.com>
@@ -21,7 +21,7 @@ class ImageUnitConverter extends AbstractUnitConverter
 {
     private $pixelPerUnits;
     private $dpi;
-    
+
     public function __construct($dpi = 96)
     {
         if(!is_int($dpi) || $dpi < 1)
@@ -32,7 +32,7 @@ class ImageUnitConverter extends AbstractUnitConverter
         $this->dpi = $dpi;
         $this->pixelPerUnits = $this->dpi/self::UNITS_PER_INCH;
     }
-    
+
 	public function convertUnit($value, $unit = null)
 	{
 	    if(is_int($value))
@@ -48,31 +48,34 @@ class ImageUnitConverter extends AbstractUnitConverter
 	    {
             $unit = $unit ? : strtolower(substr($value, -2, 2));
 	    }
-	    
+
+
 	    $value = $this->doConvertUnit($value, $unit);
-	    
+
 	    if(is_numeric($value))
 	    {
-    	    return (float) $value;		
+    	    return (float) $value;
 	    }
 	    else
 	    {
 	        return $value;
 	    }
 	}
-    
+
 	protected function convertInUnit($value)
 	{
-		return $value * $this->dpi;		
+        $value = (float) $value;
+		return $value * $this->dpi;
 	}
 
 	protected function convertPtUnit($value)
 	{
+        $value = (float) $value;
 		return $value * $this->dpi / 72;
 	}
 
 	protected function convertPxUnit($value)
 	{
-		return (int) $value;		
+		return (int) $value;
 	}
 }

@@ -20,7 +20,7 @@ class PointTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->assertEquals(10, $point1->getX());
         $this->assertEquals(array(10, 11), $point3->toArray());
     }
-    
+
     /**
      * @test
      */
@@ -48,24 +48,24 @@ class PointTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\OutOfBoundsException
      */
     public function throwExceptionIfArrayAccessIsBadCall()
     {
+        $this->expectException(\PHPPdf\Exception\OutOfBoundsException::class);
         $point = Point::getInstance(10, 5);
         $point[2];
     }
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\BadMethodCallException
      */
     public function throwExceptionIfArrayAccessSetMethodIsInvoked()
     {
+        $this->expectException(\PHPPdf\Exception\BadMethodCallException::class);
         $point = Point::getInstance(10, 10);
         $point[1] = 5;
     }
-    
+
     /**
      * @test
      * @dataProvider compareCoordinationsProvider
@@ -74,11 +74,11 @@ class PointTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $actualXCompare = $firstPoint->compareXCoord($secondPoint, $precision);
         $actualYCompare = $firstPoint->compareYCoord($secondPoint, $precision);
-        
+
         $this->assertEquals($expectedXCompare, $actualXCompare);
         $this->assertEquals($expectedYCompare, $actualYCompare);
     }
-    
+
     public function compareCoordinationsProvider()
     {
         return array(

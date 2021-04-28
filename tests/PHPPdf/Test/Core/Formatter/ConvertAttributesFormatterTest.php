@@ -14,7 +14,7 @@ class ConvertAttributesFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $formatter;
     private $document;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new ConvertAttributesFormatter();
 
@@ -55,11 +55,11 @@ class ConvertAttributesFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $node->setWidth($nodeWidth);
         $node->setMargin(0, 'auto');
 
-        $mock = $this->getMock('\PHPPdf\Core\Node\Page', array('getWidth', 'setWidth'));
+        $mock = $this->getMockBuilder('\PHPPdf\Core\Node\Page')->setMethods(array('getWidth', 'setWidth'))->getMock();
         $mock->expects($this->atLeastOnce())
              ->method('getWidth')
              ->will($this->returnValue($parentWidth));
-             
+
         if($nodeWidth > $parentWidth)
         {
             $mock->expects($this->once())
@@ -74,7 +74,7 @@ class ConvertAttributesFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->assertEquals($expectedMarginLeft, $node->getMarginLeft());
         $this->assertEquals($expectedMarginRight, $node->getMarginRight());
     }
-    
+
     public function autoMarginConvertProvider()
     {
         return array(
@@ -82,7 +82,7 @@ class ConvertAttributesFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(200, 100, 0, 0), // if child is wider than parent, margins should be set as "0" and parent width should be set as child width
         );
     }
-    
+
     /**
      * @test
      * @dataProvider angleProvider
@@ -91,19 +91,19 @@ class ConvertAttributesFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $node = new Container();
         $node->setAttribute('rotate', $angle);
-        
+
         $this->formatter->format($node, $this->document);
-        
+
         if($angle === null)
         {
             $this->assertNull($node->getAttribute('rotate'));
         }
         else
         {
-            $this->assertEquals($expectedRadians, $node->getAttribute('rotate'), 'conversion from degrees to radians failure', 0.001);
+            $this->assertEqualsWithDelta($expectedRadians, $node->getAttribute('rotate'), 0.001, 'conversion from degrees to radians failure');
         }
     }
-    
+
     public function angleProvider()
     {
         return array(
@@ -113,7 +113,7 @@ class ConvertAttributesFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array('45deg', pi()/4),
         );
     }
-    
+
     /**
      * @test
      */
@@ -121,22 +121,22 @@ class ConvertAttributesFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $color = 'color';
         $result = '#000000';
-        
+
         $node = new Container();
         $node->setAttribute('color', $color);
-        
+
         $document = $this->getMockBuilder('PHPPdf\Core\Document')
                          ->setMethods(array('getColorFromPalette'))
                          ->disableOriginalConstructor()
                          ->getMock();
-                         
+
         $document->expects($this->once())
                  ->method('getColorFromPalette')
                  ->with($color)
                  ->will($this->returnValue($result));
-                 
+
         $this->formatter->format($node, $document);
-        
+
         $this->assertEquals($result, $node->getAttribute('color'));
     }
 }

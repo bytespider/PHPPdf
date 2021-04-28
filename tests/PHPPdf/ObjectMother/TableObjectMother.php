@@ -1,19 +1,22 @@
 <?php
+declare(strict_types=1);
 
 namespace PHPPdf\ObjectMother;
+
+use PHPUnit\Framework\TestCase;
 
 class TableObjectMother
 {
     private $test;
 
-    public function  __construct(\PHPUnit_Framework_TestCase $test)
+    public function  __construct(TestCase $test)
     {
         $this->test = $test;
     }
 
     public function getCellMockWithTranslateAndResizeExpectations($width, $newWidth, $translateX)
     {
-        $boundary = $this->test->getMock('PHPPdf\Core\Boundary', array('pointTranslate', 'getMinWidth'));
+        $boundary = $this->test->getMockBuilder('PHPPdf\Core\Boundary')->setMethods(array('pointTranslate', 'getMinWidth'));
 
         $cell = $this->getCellMockWithResizeExpectations($width, $newWidth);
 
@@ -29,7 +32,7 @@ class TableObjectMother
 
     public function getCellMockWithResizeExpectations($width, $newWidth, $invokeResizeMethod = true)
     {
-        $cell = $this->test->getMock('PHPPdf\Core\Node\Table\Cell', array('getWidth', 'getBoundary', 'setWidth', 'translate', 'getNumberOfColumn', 'resize'));
+        $cell = $this->test->getMockBuilder('PHPPdf\Core\Node\Table\Cell')->setMethods(array('getWidth', 'getBoundary', 'setWidth', 'translate', 'getNumberOfColumn', 'resize'))->getMock();
 
         $cell->expects($this->test->any())
              ->method('getWidth')

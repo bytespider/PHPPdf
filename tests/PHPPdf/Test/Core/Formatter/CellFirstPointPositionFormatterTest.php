@@ -10,7 +10,7 @@ class CellFirstPointPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\Test
 {
     private $formatter;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new CellFirstPointPositionFormatter();
     }
@@ -22,17 +22,17 @@ class CellFirstPointPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\Test
     {
         $firstPoint = Point::getInstance(0, 500);
 
-        $parent = $this->getMock('PHPPdf\Core\Node\Container', array('getFirstPoint'));
+        $parent = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getFirstPoint'))->getMock();
         $parent->expects($this->atLeastOnce())
                ->method('getFirstPoint')
                ->will($this->returnValue($firstPoint));
 
-        $boundary = $this->getMock('PHPPdf\Core\Boundary', array('setNext'));
+        $boundary = $this->getMockBuilder('PHPPdf\Core\Boundary')->setMethods(array('setNext'))->getMock();
         $boundary->expects($this->once())
                  ->method('setNext')
                  ->with($firstPoint);
 
-        $node = $this->getMock('PHPPdf\Core\Node\Container', array('getParent', 'getBoundary'));
+        $node = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getParent', 'getBoundary'))->getMock();
         $node->expects($this->atLeastOnce())
               ->method('getParent')
               ->will($this->returnValue($parent));

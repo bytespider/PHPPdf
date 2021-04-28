@@ -12,9 +12,9 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $document;
     private $engine;
 
-    public function setUp()
+    public function setUp(): void
     {
-        $this->engine = $this->getMock('PHPPdf\Core\Engine\Engine');
+        $this->engine = $this->getMockBuilder('PHPPdf\Core\Engine\Engine')->getMock();
         $this->document = new Document($this->engine);
     }
 
@@ -34,20 +34,20 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
                      ->method('invoke');
             $tasks[] = $taskMock;
         }
-                 
-        $mock = $this->getMock('\PHPPdf\Core\Node\PageCollection', array('getAllDrawingTasks', 'format'));
+
+        $mock = $this->getMockBuilder('\PHPPdf\Core\Node\PageCollection')->setMethods(array('getAllDrawingTasks', 'format'))->getMock();
 
         $matcher = $mock->expects($this->once())
                         ->method('format')
-                        ->id(1);
-        
+                        ->id('1');
+
         if($assertArguments)
         {
             $matcher->with($this->document);
         }
 
         $mock->expects($this->once())
-             ->after(1)
+             ->after('1')
              ->method('getAllDrawingTasks')
              ->will($this->returnValue($tasks));
 
@@ -66,11 +66,11 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\LogicException
      */
     public function throwExceptionWhenDocumentIsDrawTwiceWithoutReset()
     {
-        $mock = $this->getMock('\PHPPdf\Core\Node\Page', array('collectOrderedDrawingTasks'));
+        $this->expectException(\PHPPdf\Exception\LogicException::class);
+        $mock = $this->getMockBuilder('\PHPPdf\Core\Node\Page')->setMethods(array('collectOrderedDrawingTasks'))->getMock();
 
         $mock->expects($this->once())
              ->method('collectOrderedDrawingTasks')
@@ -82,10 +82,10 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Core\Exception\DrawingException
      */
     public function drawingArgumentMustBeAnArrayOfPages()
     {
+        $this->expectException(\PHPPdf\Core\Exception\DrawingException::class);
         $this->document->draw(array(new \PHPPdf\Core\Node\Container()));
     }
 
@@ -98,32 +98,32 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $complexAttributeStub = $this->getMockBuilder('PHPPdf\Core\ComplexAttribute\Border')
                                 ->setMethods(array('isEmpty'))
                                 ->getMock();
-                                
+
         $complexAttributeStub->expects($this->exactly(2))
                         ->method('isEmpty')
                         ->will($this->returnValue(false));
-                                
+
         $emptyComplexAttributeStub = $this->getMockBuilder('PHPPdf\Core\ComplexAttribute\Border')
                                      ->setMethods(array('isEmpty'))
                                      ->getMock();
-                                     
+
         $emptyComplexAttributeStub->expects($this->once())
                              ->method('isEmpty')
                              ->will($this->returnValue(true));
 
-        $complexAttributeBagMock = $this->getMock('PHPPdf\Core\AttributeBag', array('getAll'));
+        $complexAttributeBagMock = $this->getMockBuilder('PHPPdf\Core\AttributeBag')->setMethods(array('getAll'))->getMock();
         $complexAttributeBagMock->expects($this->once())
                            ->method('getAll')
                            ->will($this->returnValue($complexAttributesParameters));
-                           
+
         $complexAttributesMap = array(
             'border' => $complexAttributeStub,
             'background' => $complexAttributeStub,
             'empty' => $emptyComplexAttributeStub,
         );
 
-        $complexAttributeFactoryMock = $this->getMock('PHPPdf\Core\ComplexAttribute\ComplexAttributeFactory', array('create'));
-        
+        $complexAttributeFactoryMock = $this->getMockBuilder('PHPPdf\Core\ComplexAttribute\ComplexAttributeFactory')->setMethods(array('create'))->getMock();
+
         $at = 0;
         foreach($complexAttributesParameters as $name => $params)
         {
@@ -131,7 +131,7 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
                                    ->method('create')
                                    ->with($this->equalTo($name), $this->equalTo(array_diff_key($params, array('name' => true))))
                                    ->will($this->returnValue($complexAttributesMap[$name]));
-            
+
         }
 
         $this->document->setComplexAttributeFactory($complexAttributeFactoryMock);
@@ -143,18 +143,18 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\InvalidArgumentException
      */
     public function failureOfComplexAttributeCreation()
     {
+        $this->expectException(\PHPPdf\Exception\InvalidArgumentException::class);
         $complexAttributes = array('some' => array('color' => 'red'));
 
-        $complexAttributeBagMock = $this->getMock('PHPPdf\Core\AttributeBag', array('getAll'));
+        $complexAttributeBagMock = $this->getMockBuilder('PHPPdf\Core\AttributeBag')->setMethods(array('getAll'))->getMock();
         $complexAttributeBagMock->expects($this->once())
                            ->method('getAll')
                            ->will($this->returnValue($complexAttributes));
 
-        $complexAttributeFactoryMock = $this->getMock('PHPPdf\Core\ComplexAttribute\ComplexAttributeFactory', array('create'));
+        $complexAttributeFactoryMock = $this->getMockBuilder('PHPPdf\Core\ComplexAttribute\ComplexAttributeFactory')->setMethods(array('create'))->getMock();
         $complexAttributeFactoryMock->expects($this->never())
                                ->method('create');
 
@@ -179,11 +179,11 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\RuntimeException
      * @dataProvider invalidClassNamesProvider
      */
     public function throwExceptionIfPassInvalidFormatterClassName($className)
     {
+        $this->expectException(\PHPPdf\Exception\RuntimeException::class);
         $this->document->getFormatter($className);
     }
 
@@ -194,7 +194,7 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array('UnexistedClass'),
         );
     }
-    
+
     /**
      * @test
      */
@@ -202,51 +202,49 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $unitConverter = $this->getMockBuilder('PHPPdf\Core\UnitConverter')
                               ->getMock();
-                              
+
         $this->document->setUnitConverter($unitConverter);
-        
+
         $actualUnit = '12px';
         $expectedUnit = 123;
         $actualPercent = '10%';
         $width = 120;
         $expectedPercent = 10;
-        
+
         $unitConverter->expects($this->at(0))
                       ->method('convertUnit')
                       ->with($actualUnit)
                       ->will($this->returnValue($expectedUnit));
-                      
+
         $unitConverter->expects($this->at(1))
                       ->method('convertPercentageValue')
                       ->with($actualPercent, $width)
                       ->will($this->returnValue($expectedPercent));
-                      
+
         $this->assertEquals($expectedUnit, $this->document->convertUnit($actualUnit));
         $this->assertEquals($expectedPercent, $this->document->convertPercentageValue($actualPercent, $width));
     }
-    
+
     /**
      * @test
      */
     public function getColorFromPalette()
     {
-        $palette = $this->getMockBuilder('PHPPdf\Core\ColorPalette')
-                        ->setMethods(array('get'))
-                        ->getMock();
-                        
+        $palette = $this->getMockBuilder('PHPPdf\Core\ColorPalette')->setMethods(array('get'))->getMock();
+
         $this->document->setColorPalette($palette);
-        
+
         $color = 'color';
         $result = 'result';
-        
+
         $palette->expects($this->once())
                 ->method('get')
                 ->with($color)
                 ->will($this->returnValue($result));
-                
+
         $this->assertEquals($result, $this->document->getColorFromPalette($color));
     }
-    
+
     /**
      * @test
      * @dataProvider createFontProvider
@@ -257,7 +255,7 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $filters = array();
         foreach($filterValues as $filterValue)
         {
-            $filter = $this->getMock('PHPPdf\Util\StringFilter');
+            $filter = $this->getMockBuilder('PHPPdf\Util\StringFilter')->getMock();
             $filter->expects($this->once())
                    ->method('filter')
                    ->with($previousValue)
@@ -266,11 +264,11 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
             $filters[] = $filter;
         }
 
-        $this->document->setStringFilters($filters);   
+        $this->document->setStringFilters($filters);
 
         $fontDefinition = array('normal' => $value);
-        $font = $this->getMock('PHPPdf\Core\Engine\Font');
-        
+        $font = $this->getMockBuilder('PHPPdf\Core\Engine\Font')->getMock();
+
         $this->engine->expects($this->once())
                      ->method('createFont')
                      ->with(array('normal' => $previousValue))
@@ -278,7 +276,7 @@ class DocumentTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $this->assertEquals($font, $this->document->createFont($fontDefinition));
     }
-    
+
     public function createFontProvider()
     {
         return array(

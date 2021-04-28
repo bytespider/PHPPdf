@@ -1,27 +1,30 @@
 <?php
+declare(strict_types=1);
 
 namespace PHPPdf\PHPUnit\Framework\Constraint;
 
-class ValidateByCallback extends \PHPUnit_Framework_Constraint
+use PHPUnit\Framework\TestCase;
+
+class ValidateByCallback extends \PHPUnit\Framework\Constraint\Constraint
 {
     private $closure;
     private $testCase;
     private $failureException;
     private $valid = null;
-    
-    public function __construct(\Closure $closure, \PHPUnit_Framework_TestCase $testCase)
+
+    public function __construct(\Closure $closure, TestCase $testCase)
     {
         $this->closure = $closure;
         $this->testCase = $testCase;
     }
-    
+
 	public function evaluate($other, $description = '', $returnResult = FALSE)
 	{
 	    if($this->valid !== null)
 	    {
 	        return $this->valid;
 	    }
-	    
+
 	    try
 	    {
 	        $closure = $this->closure;
@@ -33,13 +36,13 @@ class ValidateByCallback extends \PHPUnit_Framework_Constraint
 	        $this->valid = false;
 	        return false;
 	    }
-	    
+
 	    $this->valid = true;
-	    
+
 	    return true;
 	}
 
-	public function toString()
+	public function toString(): string
 	{
 		return $this->failureException->toString();
 	}

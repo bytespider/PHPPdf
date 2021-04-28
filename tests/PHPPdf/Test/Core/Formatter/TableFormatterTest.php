@@ -20,7 +20,7 @@ class TableFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->objectMother = new TableObjectMother($this);
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new TableFormatter();
     }
@@ -67,14 +67,14 @@ class TableFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
                 $translate += $columnWidth + $columnsMarginsRight[$column];
             }
 
-            $row = $this->getMock('PHPPdf\Core\Node\Table\Row', array('getChildren'));
+            $row = $this->getMockBuilder('PHPPdf\Core\Node\Table\Row')->setMethods(array('getChildren'))->getMock();
             $row->expects($this->atLeastOnce())
                 ->method('getChildren')
                 ->will($this->returnValue($cells));
             $rows[] = $row;
         }
 
-        $table = $this->getMock('PHPPdf\Core\Node\Table', array('getChildren', 'getWidthsOfColumns', 'getMinWidthsOfColumns', 'getWidth', 'getMarginsLeftOfColumns', 'getMarginsRightOfColumns'));
+        $table = $this->getMockBuilder('PHPPdf\Core\Node\Table')->setMethods(array('getChildren', 'getWidthsOfColumns', 'getMinWidthsOfColumns', 'getWidth', 'getMarginsLeftOfColumns', 'getMarginsRightOfColumns'))->getMock();
         $table->expects($this->atLeastOnce())
               ->method('getChildren')
               ->will($this->returnValue($rows));

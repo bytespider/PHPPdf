@@ -10,7 +10,7 @@ class CellTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $cell;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->cell = new Cell();
     }
@@ -38,8 +38,8 @@ class CellTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function tableGetter()
     {
-        $table = $this->getMock('PHPPdf\Core\Node\Table');
-        $row = $this->getMock('PHPPdf\Core\Node\Table\Row');
+        $table = $this->getMockBuilder('PHPPdf\Core\Node\Table')->getMock();
+        $row = $this->getMockBuilder('PHPPdf\Core\Node\Table\Row')->getMock();
 
         //internally in Node class is used $parent propery (not getParent() method) due to performance
         $this->writeAttribute($row, 'parent', $table);
@@ -54,8 +54,8 @@ class CellTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function notifyListenersWhenAttributeHasChanged()
     {
-        $listener = $this->getMock('PHPPdf\Core\Node\Listener', array('attributeChanged', 'parentBind'));
-        
+        $listener = $this->getMockBuilder('PHPPdf\Core\Node\Listener')->setMethods(array('attributeChanged', 'parentBind'))->getMock();
+
         $listener->expects($this->at(0))
                  ->method('attributeChanged')
                  ->with($this->cell, 'width', null);

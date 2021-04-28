@@ -64,7 +64,7 @@ XML;
 
         if($placeholders)
         {
-            $this->assertContains('placeholders', $pdfContent);
+            $this->assertStringContainsString('placeholders', $pdfContent);
         }
     }
 
@@ -101,4 +101,4 @@ XML;
             ->build();
         return $facade;
     }
-} 
+}

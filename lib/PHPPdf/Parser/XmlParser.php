@@ -48,7 +48,7 @@ abstract class XmlParser implements Parser
                     break;
                 case \XMLReader::TEXT:
                 case \XMLReader::SIGNIFICANT_WHITESPACE:
-                case \XMLReader::WHITESPACE:                    
+                case \XMLReader::WHITESPACE:
                 case \XMLReader::CDATA:
                 case \XMLReader::ENTITY:
                 case \XMLReader::ENTITY_REF:
@@ -60,17 +60,17 @@ abstract class XmlParser implements Parser
 
         $this->stack = array();
         $this->stackSize = 0;
-        
+
         if(!$this->xmlReaderProvidedFromOutside)
         {
-            $reader->close();            
+            $reader->close();
         }
-        
+
         $this->reset();
 
         return $root;
     }
-    
+
     protected function reset()
     {
     }
@@ -85,7 +85,7 @@ abstract class XmlParser implements Parser
         else
         {
             $reader = $this->createReader($content);
- 
+
             $nodeType = $reader->nodeType;
             while($reader->nodeType !== \XMLReader::ELEMENT)
             {
@@ -96,22 +96,22 @@ abstract class XmlParser implements Parser
             {
                 throw new Exceptions\InvalidTagException(sprintf('Root of xml document must be "%s", "%s" given.', static::ROOT_TAG, $reader->name));
             }
-            
+
             $this->parseRootAttributes($reader);
-            
+
             $this->seekReaderToNextTag($reader);
         }
 
         return $reader;
     }
-    
+
     /**
      * Converts XMLReader's error on ParseException
      */
     protected function read(\XMLReader $reader)
     {
         libxml_clear_errors();
-        
+
         $status = @$reader->read();
 
         $error = libxml_get_last_error();
@@ -136,7 +136,7 @@ abstract class XmlParser implements Parser
         else
         {
             $success = @$reader->open($content, null, LIBXML_NOBLANKS | LIBXML_DTDLOAD);
-            
+
             if(!$success)
             {
                 throw new ParseException(sprintf('File "%s" doesn\'t exist or is unreadable', $content));
@@ -147,7 +147,7 @@ abstract class XmlParser implements Parser
 
         return $reader;
     }
-    
+
     private function isXmlDocument($content)
     {
         return strpos($content, '<') === 0;
@@ -162,7 +162,7 @@ abstract class XmlParser implements Parser
         }
         while($result && $reader->nodeType !== \XMLReader::ELEMENT && $reader->nodeType !== \XMLReader::TEXT);
     }
-    
+
     protected function parseRootAttributes(\XMLReader $reader)
     {
     }
@@ -181,7 +181,7 @@ abstract class XmlParser implements Parser
     {
         return $this->stack[$this->stackSize-1];
     }
-    
+
     protected function &getFirstElementFromStack()
     {
         return $this->stack[0];
@@ -206,7 +206,7 @@ abstract class XmlParser implements Parser
     {
         return $reader->name == static::ROOT_TAG;
     }
-    
+
     protected function clearStack()
     {
         $this->stack = array();

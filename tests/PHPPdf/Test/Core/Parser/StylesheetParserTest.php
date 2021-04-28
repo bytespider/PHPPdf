@@ -11,7 +11,7 @@ class StylesheetParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $parser;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->parser = new StylesheetParser();
     }
@@ -27,7 +27,7 @@ class StylesheetParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->assertEquals(0, count($constraintContainer));
         $this->assertEquals(array(), $constraintContainer->getAll());
     }
-    
+
     public function emptyXmlProvider()
     {
         return array(
@@ -50,7 +50,7 @@ class StylesheetParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
 XML;
         $constraintContainer = $this->parser->parse($xml);
 
-        $this->assertEquals(1, count($constraintContainer->count()));
+        $this->assertEquals(1, $constraintContainer->count());
         $this->assertTrue($this->hasConstraint($constraintContainer, 'tag'));
         $constraint = $this->getConstraint($constraintContainer, 'tag');
         $this->assertEquals(array('someName' => 'someValue'), $constraint->getAll());
@@ -80,10 +80,10 @@ XML;
 
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\InvalidTagException
      */
     public function invalidRoot()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\InvalidTagException::class);
         $xml = '<invalid-root></invalid-root>';
         $this->parser->parse($xml);
     }
@@ -160,10 +160,10 @@ XML;
 
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function complexAttributeNameIsRequired()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $xml = <<<XML
 <stylesheet>
     <tag>
@@ -176,10 +176,10 @@ XML;
 
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function attributeNameIsRequired()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $xml = <<<XML
 <stylesheet>
     <tag>
@@ -192,10 +192,10 @@ XML;
 
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function attributeValueIsRequired()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $xml = <<<XML
 <stylesheet>
     <tag>
@@ -310,13 +310,13 @@ XML;
 
         $this->assertTrue($constraint === $resultConstraint);
     }
-    
+
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function throwExceptionIfUnknownTahHasBeenEncountedInParserSimpleMode()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $xml = <<<XML
 <stylesheet>
 	<unknown-tag>
@@ -326,10 +326,10 @@ XML;
 XML;
 
         $this->parser->setThrowsExceptionOnConstraintTag(true);
-        
+
         $this->parser->parse($xml);
     }
-    
+
     /**
      * @test
      */
@@ -342,12 +342,12 @@ XML;
 XML;
 
         $this->parser->setThrowsExceptionOnConstraintTag(true);
-        
+
         $resultConstraint = $this->parser->parse($xml);
 
         $this->assertEquals(array('someName' => 'value'), $resultConstraint->getAll());
     }
-    
+
     /**
      * @test
      */
@@ -362,11 +362,11 @@ XML;
         $resultConstraint = $this->parser->parse($xml);
 
         $constraint = $this->getConstraint($resultConstraint, 'some-tag');
-        
+
         $this->assertNotNull($constraint);
         $this->assertEquals(array('someAttribute' => 'someValue'), $constraint->getAll());
     }
-    
+
     /**
      * @test
      */
@@ -382,21 +382,21 @@ XML;
                                    ->setMethods(array('getDefinitionNames'))
                                    ->disableOriginalConstructor()
                                    ->getMock();
-        
+
         $this->parser->setComplexAttributeFactory($complexAttributeFactory);
-        
+
         $complexAttributeFactory->expects($this->atLeastOnce())
                            ->method('getDefinitionNames')
                            ->will($this->returnValue('someComplexAttribute'));
 
-        $resultConstraint = $this->parser->parse($xml);        
+        $resultConstraint = $this->parser->parse($xml);
 
         $constraint = $this->getConstraint($resultConstraint, 'some-tag');
-        
+
         $this->assertNotEquals(false, $constraint);
         $this->assertEquals(array('someComplexAttribute' => array('name' => 'someComplexAttribute', 'attribute' => 'value')), $constraint->getAll());
     }
-    
+
     /**
      * @test
      */
@@ -416,7 +416,7 @@ XML;
         $this->assertNotEquals(false, $constraint);
         $this->assertEquals(array('attribute2' => 'value2'), $constraint->getAll());
     }
-    
+
     /**
      * @test
      */
@@ -429,27 +429,27 @@ XML;
         $reader = new \XMLReader();
         $reader->XML($xml);
         $reader->next();
-        
+
         $complexAttributeFactory = $this->getMockBuilder('PHPPdf\Core\ComplexAttribute\ComplexAttributeFactory')
                                    ->setMethods(array('getDefinitionNames'))
                                    ->disableOriginalConstructor()
                                    ->getMock();
-                                   
+
         $this->parser->setComplexAttributeFactory($complexAttributeFactory);
-        
+
         $complexAttributeFactory->expects($this->atLeastOnce())
                            ->method('getDefinitionNames')
                            ->will($this->returnValue(array('attribute2', 'attribute4', 'attribute6')));
-                           
+
         $constraint = new BagContainer();
-        
+
         $this->parser->addConstraintsFromAttributes($constraint, $reader);
-        
+
         $expectedAttributes = array('attribute1' => 'value1', 'attribute2' => array('name' => 'attribute2', 'property1' => 'value2', 'property2' => 'value3'), 'attribute3' => 'value4', 'attribute4' => array('name' => 'attribute4', 'property3' => 'value5'), 'attribute5-property4' => 'value6', 'attribute6' => 'value7');
-        
+
         $this->assertEquals($expectedAttributes, $constraint->getAll());
     }
-    
+
     /**
      * @test
      */
@@ -462,24 +462,24 @@ XML;
         $reader = new \XMLReader();
         $reader->XML($xml);
         $reader->next();
-        
+
         $complexAttributeFactory = $this->getMockBuilder('PHPPdf\Core\ComplexAttribute\ComplexAttributeFactory')
                                    ->setMethods(array('getDefinitionNames'))
                                    ->disableOriginalConstructor()
                                    ->getMock();
-                                   
+
         $this->parser->setComplexAttributeFactory($complexAttributeFactory);
-        
+
         $complexAttributeFactory->expects($this->atLeastOnce())
                            ->method('getDefinitionNames')
                            ->will($this->returnValue(array('attribute3', 'attribute4')));
-                           
+
         $constraint = new BagContainer();
-        
+
         $this->parser->addConstraintsFromAttributes($constraint, $reader);
-        
+
         $expectedAttributes = array('attribute1' => 'value1', 'attribute2' => 'value2', 'attribute3' => array('name' => 'attribute3', 'property' => 'value3'), 'attribute4' => array('name' => 'attribute4', 'property' => 'value4'));
-        
+
         $this->assertEquals($expectedAttributes, $constraint->getAll());
     }
 }

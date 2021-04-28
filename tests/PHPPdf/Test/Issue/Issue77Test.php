@@ -14,7 +14,7 @@ class Issue77Test extends TestCase
      */
     private $facade;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $loader = new \PHPPdf\Core\Configuration\LoaderImpl();
         $builder = \PHPPdf\Core\FacadeBuilder::create($loader);
@@ -30,8 +30,8 @@ class Issue77Test extends TestCase
         $this->renderDocumentWithFooter('Document 1', $useTemplate);
         $content = $this->renderDocumentWithFooter('Document 2', $useTemplate);
 
-        $this->assertContains('Document 2', $content);
-        $this->assertNotContains('Document 1', $content);
+        $this->assertStringContainsString('Document 2', $content);
+        $this->assertStringNotContainsString('Document 1', $content);
     }
 
     public function booleanProvider()

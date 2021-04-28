@@ -23,7 +23,7 @@ class ParagraphTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $paragraph;
     
-    public function setUp()
+    public function setUp(): void
     {
         $this->paragraph = new Paragraph();
     }

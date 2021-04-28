@@ -14,32 +14,32 @@ class BasicListTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $list;
     private $objectMother;
-    
+
     public function init()
     {
         $this->objectMother = new NodeObjectMother($this);
     }
-    
-    public function setUp()
+
+    public function setUp(): void
     {
         $this->list = new BasicList();
     }
-    
+
     /**
      * @test
      * @dataProvider sizesProvider
      */
     public function renderListTypeForEachChildren($numberOfChildren)
     {
-        $page = $this->getMock('PHPPdf\Core\Node\Page', array('getGraphicsContext', 'getAttribute'));
-        
+        $page = $this->getMockBuilder('PHPPdf\Core\Node\Page')->setMethods(array('getGraphicsContext', 'getAttribute'))->getMock();
+
         $gc = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
                    ->getMock();
-        
+
         $page->expects($this->atLeastOnce())
              ->method('getGraphicsContext')
              ->will($this->returnValue($gc));
-             
+
         $this->list->setParent($page);
         $enumerationStrategy = $this->getMockBuilder('PHPPdf\Core\Node\BasicList\EnumerationStrategy')
                                     ->getMock();
@@ -47,7 +47,7 @@ class BasicListTest extends \PHPPdf\PHPUnit\Framework\TestCase
                             ->method('setIndex')
                             ->with(0);
         $document = $this->createDocumentStub();
-        
+
         $this->list->setEnumerationStrategy($enumerationStrategy);
 
         for($i=0; $i<$numberOfChildren; $i++)
@@ -59,16 +59,16 @@ class BasicListTest extends \PHPPdf\PHPUnit\Framework\TestCase
         }
         $enumerationStrategy->expects($this->at($i))
                             ->method('reset');
-        
+
         $tasks = new DrawingTaskHeap();
         $this->list->collectOrderedDrawingTasks($document, $tasks);
-        
+
         foreach($tasks as $task)
         {
             $task->invoke();
         }
     }
-    
+
     public function sizesProvider()
     {
         return array(
@@ -76,7 +76,7 @@ class BasicListTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(10),
         );
     }
-    
+
     /**
      * @test
      */
@@ -88,15 +88,15 @@ class BasicListTest extends \PHPPdf\PHPUnit\Framework\TestCase
             'square' => BasicList::TYPE_SQUARE,
             'none' => BasicList::TYPE_NONE,
         );
-        
+
         foreach($types as $name => $value)
         {
             $this->list->setAttribute('type', $name);
-            
+
             $this->assertEquals($value, $this->list->getAttribute('type'));
         }
     }
-    
+
     /**
      * @test
      * @dataProvider enumerationProvider
@@ -104,24 +104,24 @@ class BasicListTest extends \PHPPdf\PHPUnit\Framework\TestCase
     public function determineEnumerationStrategyOnType($type, $expectedEnumerationStrategyClass)
     {
         $this->list->setAttribute('type', $type);
-        
-        $factory = $this->getMock('PHPPdf\Core\Node\BasicList\EnumerationStrategyFactory', array('create'));
-        
+
+        $factory = $this->getMockBuilder('PHPPdf\Core\Node\BasicList\EnumerationStrategyFactory')->setMethods(array('create'))->getMock();
+
         $expectedStrategy = new $expectedEnumerationStrategyClass();
         $factory->expects($this->once())
                 ->method('create')
                 ->with($type)
                 ->will($this->returnValue($expectedStrategy));
-                
+
         $this->list->setEnumerationStrategyFactory($factory);
-        
+
         $this->list->assignEnumerationStrategyFromFactory();
-        
+
         $enumerationStrategy = $this->list->getEnumerationStrategy();
-        
+
         $this->assertTrue($expectedStrategy === $enumerationStrategy);
     }
-    
+
     public function enumerationProvider()
     {
         return array(
@@ -132,7 +132,7 @@ class BasicListTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(BasicList::TYPE_DECIMAL, 'PHPPdf\Core\Node\BasicList\OrderedEnumerationStrategy'),
         );
     }
-    
+
     /**
      * @test
      */
@@ -141,36 +141,36 @@ class BasicListTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $font = $this->getMockBuilder('PHPPdf\Core\Engine\Font')
                      ->getMock();
         $this->list->setAttribute('font-type', $font);
-        
+
         $type = BasicList::TYPE_CIRCLE;
         $this->list->setAttribute('type', $type);
-        
-        $factory = $this->getMock('PHPPdf\Core\Node\BasicList\EnumerationStrategyFactory', array('create'));
-        
+
+        $factory = $this->getMockBuilder('PHPPdf\Core\Node\BasicList\EnumerationStrategyFactory')->setMethods(array('create'))->getMock();
+
         $strategyStub = 'some-stub1';
         $factory->expects($this->once())
                 ->method('create')
                 ->with($type)
                 ->will($this->returnValue($strategyStub));
         $this->list->setEnumerationStrategyFactory($factory);
-        
+
         $this->assertTrue($strategyStub === $this->list->getEnumerationStrategy());
         $this->assertTrue($strategyStub === $this->list->getEnumerationStrategy());
-        
+
         $enumerationStrategy = $this->list->getEnumerationStrategy();
-        
+
         $type = BasicList::TYPE_DECIMAL;
         $strategyStub = 'some-stub2';
-        
-        $factory = $this->getMock('PHPPdf\Core\Node\BasicList\EnumerationStrategyFactory', array('create'));
+
+        $factory = $this->getMockBuilder('PHPPdf\Core\Node\BasicList\EnumerationStrategyFactory')->setMethods(array('create'))->getMock();
         $factory->expects($this->once())
                 ->method('create')
                 ->with($type)
                 ->will($this->returnValue($strategyStub));
         $this->list->setEnumerationStrategyFactory($factory);
-        
+
         $this->list->setAttribute('type', $type);
-        
+
         $this->assertFalse($enumerationStrategy === $this->list->getEnumerationStrategy());
     }
 }

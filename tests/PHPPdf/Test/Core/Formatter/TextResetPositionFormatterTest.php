@@ -11,7 +11,7 @@ class TextResetPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $formatter;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new TextResetPositionFormatter();
     }
@@ -21,7 +21,7 @@ class TextResetPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function clearBoundaryAndAddOldFirstPoint()
     {
-        $nodeMock = $this->getMock('\PHPPdf\Core\Node\Text', array('getBoundary'));
+        $nodeMock = $this->getMockBuilder('\PHPPdf\Core\Node\Text')->setMethods(array('getBoundary'))->getMock();
 
         $boundary = new Boundary();
         $boundary->setNext(0, 100)

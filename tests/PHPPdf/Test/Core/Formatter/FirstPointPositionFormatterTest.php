@@ -14,7 +14,7 @@ class FirstPointPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $formatter;
     private $objectMother;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new FirstPointPositionFormatter();
         $this->objectMother = new NodeObjectMother($this);
@@ -26,13 +26,13 @@ class FirstPointPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function designateFirstPointIfNodeHasntPreviousSibling($parentFirstPoint, $marginLeft, $marginTop)
     {
-        $parent = $this->getMock('PHPPdf\Core\Node\Container', array('getStartDrawingPoint'));
+        $parent = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getStartDrawingPoint'))->getMock();
 
         $parent->expects($this->atLeastOnce())
                ->method('getStartDrawingPoint')
                ->will($this->returnValue($parentFirstPoint));
 
-        $node = $this->getMock('PHPPdf\Core\Node\Container', array('getParent', 'getPreviousSibling', 'getMarginLeft', 'getMarginTop'));
+        $node = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getParent', 'getPreviousSibling', 'getMarginLeft', 'getMarginTop'))->getMock();
 
         $node->expects($this->atLeastOnce())
               ->method('getParent')
@@ -61,7 +61,7 @@ class FirstPointPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(array(0, 600), 10, 10),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider booleanProvider
@@ -70,19 +70,19 @@ class FirstPointPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $parentFirstPoint = array(0, 100);
         $lineHeight = 20;
-        
-        $parent = $this->getMock('PHPPdf\Core\Node\Container', array('getStartDrawingPoint'));
-        
+
+        $parent = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getStartDrawingPoint'))->getMock();
+
         $parent->expects($this->atLeastOnce())
                ->method('getStartDrawingPoint')
                ->will($this->returnValue($parentFirstPoint));
-               
+
         $previousSibling = new Container();
         $boundary = $this->objectMother->getBoundaryStub($parentFirstPoint[0], $parentFirstPoint[1], 100, 0);
         $this->invokeMethod($previousSibling, 'setBoundary', array($boundary));
         $previousSibling->setAttribute('line-break', $lineBreakOfPreviousSibling);
 
-        $node = $this->getMock('PHPPdf\Core\Node\Container', array('getParent', 'getPreviousSibling', 'getLineHeightRecursively'));
+        $node = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getParent', 'getPreviousSibling', 'getLineHeightRecursively'))->getMock();
         $node->setAttribute('line-break', true);
         $node->expects($this->atLeastOnce())
              ->method('getParent')
@@ -93,15 +93,15 @@ class FirstPointPositionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $node->expects($this->any())
              ->method('getLineHeightRecursively')
              ->will($this->returnValue($lineHeight));
-        
+
         $this->formatter->format($node, $this->createDocumentStub());
-        
+
         //break line only when previous sibling also has line-break attribute on
         $expectedYCoord = $lineBreakOfPreviousSibling ? ($parentFirstPoint[1] - $lineHeight) : $parentFirstPoint[1];
-        
+
         $this->assertEquals($expectedYCoord, $node->getFirstPoint()->getY());
     }
-    
+
     public function booleanProvider()
     {
         return array(

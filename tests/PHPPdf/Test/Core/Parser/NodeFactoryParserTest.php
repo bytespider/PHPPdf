@@ -10,7 +10,7 @@ class NodeFactoryParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $parser;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->parser = new NodeFactoryParser();
     }
@@ -29,10 +29,10 @@ class NodeFactoryParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function throwExceptionIfDocumentHasInvalidRoot()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $xml = '<invalid-root></invalid-root>';
 
         $this->parser->parse($xml);
@@ -67,12 +67,12 @@ XML;
 
         $this->assertTrue($nodeFactory->hasPrototype('div'));
         $this->assertTrue($nodeFactory->hasPrototype('p'));
-        
+
         $this->assertFalse($nodeFactory->hasPrototype('anotherTag'));
 
         $this->assertInstanceOf('PHPPdf\Core\Node\Container', $nodeFactory->getPrototype('div'));
     }
-    
+
     /**
      * @test
      */
@@ -89,7 +89,7 @@ XML;
     </nodes>
 </factory>
 XML;
-        
+
         $unitConverter = $this->getMockBuilder('PHPPdf\Core\UnitConverter')
                               ->getMock();
 
@@ -100,9 +100,9 @@ XML;
                       ->will($this->returnValue($expected));
 
         $this->parser->setUnitConverter($unitConverter);
-        
+
         $nodeFactory = $this->parser->parse($xml);
-        
+
         $div = $nodeFactory->getPrototype('div');
 
         $this->assertEquals($unitConverter, $div->getUnitConverter());
@@ -111,10 +111,10 @@ XML;
 
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function throwExceptionIfRequiredAttributesAreMissing()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $xml = <<<XML
 <factory>
     <nodes>
@@ -142,18 +142,18 @@ XML;
 </factory>
 XML;
 
-        $bagContainerMock = $this->getMock('PHPPdf\Core\Parser\BagContainer', array('apply'));
+        $bagContainerMock = $this->getMockBuilder('PHPPdf\Core\Parser\BagContainer')->setMethods(array('apply'))->getMock();
         $bagContainerMock->expects($this->once())
                          ->method('apply')
                          ->with($this->isInstanceOf('PHPPdf\Core\Node\Container'));
 
-        $stylesheetParserMock = $this->getMock('PHPPdf\Core\Parser\StylesheetParser', array('parse'));
+        $stylesheetParserMock = $this->getMockBuilder('PHPPdf\Core\Parser\StylesheetParser')->setMethods(array('parse'))->getMock();
         $stylesheetParserMock->expects($this->once())
                              ->method('parse')
                              ->will($this->returnValue($bagContainerMock));
 
         $this->parser->setStylesheetParser($stylesheetParserMock);
-        
+
         $nodeFactory = $this->parser->parse($xml);
     }
 
@@ -189,7 +189,7 @@ XML;
             $this->assertEquals(array('PHPPdf\Core\Formatter\FloatFormatter'), $node->getFormattersNames($formatterType));
         }
     }
-    
+
     public function formatterTypeProvider()
     {
         return array(
@@ -197,7 +197,7 @@ XML;
             array('post'),
         );
     }
-    
+
     /**
      * @test
      */
@@ -217,7 +217,7 @@ XML;
 </factory>
 XML;
         $nodeFactory = $this->parser->parse($xml);
-        
+
         $expected = array(
             'tag1' => array('setMarginLeft' => 'marginLeft'),
             'tag3' => array('setMarginLeft' => 'marginLeft2'),
@@ -225,7 +225,7 @@ XML;
 
         $this->assertEquals($expected, $nodeFactory->invocationsMethodsOnCreate());
     }
-    
+
     /**
      * @test
      */
@@ -248,12 +248,12 @@ XML;
 XML;
 
         $nodeFactory = $this->parser->parse($xml);
-        
+
         $this->assertTrue($nodeFactory->getPrototype('tag1') === $nodeFactory->getPrototype('tag2'));
         $this->assertTrue($nodeFactory->getPrototype('tag1') === $nodeFactory->getPrototype('tag3'));
         $this->assertTrue($nodeFactory->getPrototype('tag4') === $nodeFactory->getPrototype('tag5'));
     }
-    
+
     /**
      * @test
      */
@@ -269,10 +269,10 @@ XML;
 XML;
 
         $nodeFactory = $this->parser->parse($xml);
-        
+
         $this->assertEquals(array('some-id-1' => 'someValue-1', 'some-id-2' => 'someValue-2'), $nodeFactory->getInvokeArgs());
     }
-    
+
     /**
      * @test
      */

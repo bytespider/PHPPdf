@@ -9,7 +9,7 @@ class NodeFactoryTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $factory;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->factory = new NodeFactory();
     }
@@ -19,7 +19,7 @@ class NodeFactoryTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function nodeCreating()
     {
-        $mock = $this->getMock('PHPPdf\Core\Node\Node', array('copy'));
+        $mock = $this->getMockBuilder('PHPPdf\Core\Node\Node')->setMethods(array('copy'))->getMock();
 
         $mock->expects($this->once())
              ->method('copy')
@@ -47,19 +47,19 @@ class NodeFactoryTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Core\Exception\UnregisteredNodeException
      */
     public function creatingNotExistedNode()
     {
+        $this->expectException(\PHPPdf\Core\Exception\UnregisteredNodeException::class);
         $this->factory->create('key');
     }
 
     /**
      * @test
-     * @expectedException PHPPdf\Core\Exception\UnregisteredNodeException
      */
     public function gettingNotExistingPrototype()
     {
+        $this->expectException(\PHPPdf\Core\Exception\UnregisteredNodeException::class);
         $this->factory->getPrototype('key');
     }
 
@@ -76,35 +76,35 @@ class NodeFactoryTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $this->assertEquals($this->factory->getPrototype($key), $unserializedFactory->getPrototype($key));
     }
-    
+
     /**
      * @test
      */
     public function invokeNodeMethodOnCreation()
     {
         $key = 'key';
-        
+
         $invokeMethodName = 'setMarginLeft';
         $invokeMethodArg = 12;
         $invokeMethodArgTag = 'tag';
-        
-        $prototype = $this->getMock('PHPPdf\Core\Node\Container', array('copy'));
-        $product = $this->getMock('PHPPdf\Core\Node\Container', array($invokeMethodName));
-        
+
+        $prototype = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('copy'))->getMock();
+        $product = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array($invokeMethodName))->getMock();
+
         $prototype->expects($this->once())
                   ->method('copy')
                   ->will($this->returnValue($product));
-                  
+
         $product->expects($this->once())
                 ->method($invokeMethodName)
-                ->with($invokeMethodArg);                  
-        
+                ->with($invokeMethodArg);
+
         $this->factory->addPrototype($key, $prototype, array($invokeMethodName => $invokeMethodArgTag));
         $this->factory->addInvokeArg($invokeMethodArgTag, $invokeMethodArg);
-        
-        $this->assertTrue($product === $this->factory->create($key));        
+
+        $this->assertTrue($product === $this->factory->create($key));
     }
-    
+
     /**
      * @test
      */
@@ -114,11 +114,11 @@ class NodeFactoryTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $aliases = array('alias1', 'alias2');
         $key = 'key';
         $this->factory->addPrototype($key, $prototype, array(), $aliases);
-        
+
         foreach($aliases as $alias)
         {
             $this->assertTrue($prototype === $this->factory->getPrototype($alias));
-            
+
             $copy = $this->factory->create($alias);
         }
     }

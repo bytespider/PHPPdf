@@ -9,21 +9,21 @@ class RowTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $row = null;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->row = new Row();
     }
 
     /**
      * @test
-     * @expectedException \InvalidArgumentException
      */
     public function addingInvalidChild()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $node = new Nodes\Container();
         $this->row->add($node);
     }
-    
+
     /**
      * @test
      */
@@ -34,7 +34,7 @@ class RowTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $this->assertTrue(count($this->row->getChildren()) > 0);
     }
-    
+
     /**
      * @test
      */
@@ -56,9 +56,7 @@ class RowTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function getHeightFromTable()
     {
-        $tableMock = $this->getMock('PHPPdf\Core\Node\Table', array(
-            'getRowHeight'
-        ));
+        $tableMock = $this->getMockBuilder('PHPPdf\Core\Node\Table')->setMethods(array('getRowHeight'))->getMock();
 
         $rowHeight = 45;
         $tableMock->expects($this->once())
@@ -69,15 +67,13 @@ class RowTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $this->assertEquals($rowHeight, $this->row->getHeight());
     }
-    
+
     /**
      * @test
      */
     public function getWidthFromTable()
     {
-        $tableMock = $this->getMock('PHPPdf\Core\Node\Table', array(
-            'getWidth'
-        ));
+        $tableMock = $this->getMockBuilder('PHPPdf\Core\Node\Table')->setMethods(array('getWidth'))->getMock();
 
         $width = 200;
         $tableMock->expects($this->exactly(2))
@@ -100,7 +96,7 @@ class RowTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $i = 0;
         foreach($colspans as $colspan)
         {
-            $cell = $this->getMock('PHPPdf\Core\Node\Table\Cell', array('setNumberOfColumn', 'getColspan'));
+            $cell = $this->getMockBuilder('PHPPdf\Core\Node\Table\Cell')->setMethods(array('setNumberOfColumn', 'getColspan'))->getMock();
             $cell->expects($this->atLeastOnce())
                  ->method('getColspan')
                  ->will($this->returnValue($colspan));
@@ -133,16 +129,16 @@ class RowTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function addTableAsListenerWhenCellHasAddedToRow()
     {
-        $table = $this->getMock('PHPPdf\Core\Node\Table');
+        $table = $this->getMockBuilder('PHPPdf\Core\Node\Table')->getMock();
         $cell = $this->cellWithAddListenerExpectation($table);
 
         $this->row->setParent($table);
         $this->row->add($cell);
     }
-    
+
     private function cellWithAddListenerExpectation($listener)
     {
-        $cell = $this->getMock('PHPPdf\Core\Node\Table\Cell', array('addListener'));
+        $cell = $this->getMockBuilder('PHPPdf\Core\Node\Table\Cell')->setMethods(array('addListener'))->getMock();
 
         $cell->expects($this->at(0))
              ->method('addListener')
@@ -191,7 +187,7 @@ class RowTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $cells = array();
         foreach($heights as $height)
         {
-            $cell = $this->getMock('PHPPdf\Core\Node\Table\Cell', array('getHeight'));
+            $cell = $this->getMockBuilder('PHPPdf\Core\Node\Table\Cell')->setMethods(array('getHeight'))->getMock();
             $cell->expects($this->atLeastOnce())
                  ->method('getHeight')
                  ->will($this->returnValue($height));
@@ -250,7 +246,7 @@ class RowTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         for($i=0, $count = count($marginsTop); $i<$count; $i++)
         {
-            $cell = $this->getMock('PHPPdf\Core\Node\Table\Cell', array('getMarginTop', 'getMarginBottom'));
+            $cell = $this->getMockBuilder('PHPPdf\Core\Node\Table\Cell')->setMethods(array('getMarginTop', 'getMarginBottom'))->getMock();
             $cell->expects($this->atLeastOnce())
                  ->method('getMarginTop')
                  ->will($this->returnValue($marginsTop[$i]));

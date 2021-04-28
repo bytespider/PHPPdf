@@ -7,7 +7,7 @@ use PHPPdf\Core\UnitConverter;
 
 class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         if(!class_exists('ZendPdf\PdfDocument', true))
         {
@@ -21,22 +21,22 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
     public function createImageObject()
     {
         $image = new Image(TEST_RESOURCES_DIR.'/domek.png');
-        
+
         $zendImage = $image->getWrappedImage();
-        
+
         $this->assertEquals($zendImage->getPixelHeight(), $image->getOriginalHeight());
         $this->assertEquals($zendImage->getPixelWidth(), $image->getOriginalWidth());
     }
-    
+
     /**
      * @test
-     * @expectedException PHPPdf\Exception\InvalidResourceException
      */
     public function throwExceptionOnUnexistedImage()
     {
+        $this->expectException(\PHPPdf\Exception\InvalidResourceException::class);
         $image = new Image('some path');
     }
-    
+
     /**
      * @test
      */
@@ -44,7 +44,7 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $converter = $this->getMockBuilder('PHPPdf\Core\UnitConverter')
                           ->getMock();
-                          
+
         $size = 100;
         $sampleImageSize = 315;
         $converter->expects($this->at(0))
@@ -55,10 +55,10 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
                   ->method('convertUnit')
                   ->with($sampleImageSize, UnitConverter::UNIT_PIXEL)
                   ->will($this->returnValue($size));
-                          
+
         $image = new Image(TEST_RESOURCES_DIR.'/domek.png', $converter);
-        
-        $this->assertEquals($size, $image->getOriginalWidth());        
-        $this->assertEquals($size, $image->getOriginalHeight());        
+
+        $this->assertEquals($size, $image->getOriginalWidth());
+        $this->assertEquals($size, $image->getOriginalHeight());
     }
 }

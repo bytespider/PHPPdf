@@ -9,14 +9,14 @@ use PHPPdf\Core\Node\BasicList;
 abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     protected $strategy;
-    
-    public function setUp()
+
+    public function setUp(): void
     {
         $this->strategy = $this->createStrategy();
     }
-    
-    abstract protected function createStrategy();    
-    
+
+    abstract protected function createStrategy();
+
     /**
      * @test
      * @dataProvider integerProvider
@@ -30,15 +30,15 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
                              ->getMock();
 
         $colorStub = '#123456';
-        
+
         $this->setElementPattern($listMock, $elementPattern);
-        
+
         $fontSize = rand(10, 15);
         $encoding = 'utf-8';
-        
+
         $expectedText = $this->getExpectedText($elementIndex, $elementPattern);
-        
-        $child = $this->getMock('PHPPdf\Core\Node\Container', array('getFirstPoint', 'getMarginLeft', 'getPaddingTop'));
+
+        $child = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getFirstPoint', 'getMarginLeft', 'getPaddingTop'))->getMock();
         $child->expects($this->atLeastOnce())
               ->method('getFirstPoint')
               ->will($this->returnValue($point));
@@ -48,7 +48,7 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
         $child->expects($this->once())
               ->method('getPaddingTop')
               ->will($this->returnValue($paddingTop));
-              
+
         $listMock->expects($this->once())
                        ->method('getChild')
                        ->with($elementIndex)
@@ -60,11 +60,11 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
         {
             $expectedWidth = rand(3, 7);
             $positionTranslation -= $expectedWidth;
-            
+
             $fontTypeMock->expects($this->once())
                          ->method('getWidthOfText')
                          ->with($expectedText, $fontSize)
-                         ->will($this->returnValue($expectedWidth));                       
+                         ->will($this->returnValue($expectedWidth));
         }
         else
         {
@@ -76,7 +76,7 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
                          ->setMethods(array('getFont'))
                          ->disableOriginalConstructor()
                          ->getMock();
-        
+
         $listMock->expects($this->atLeastOnce())
                        ->method('getAttribute')
                        ->with('list-position')
@@ -88,7 +88,7 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
                        ->method('getRecurseAttribute')
                        ->with('color')
                        ->will($this->returnValue($colorStub));
-                       
+
         $listMock->expects($this->once())
                        ->method('getEncoding')
                        ->will($this->returnValue($encoding));
@@ -96,14 +96,14 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
                  ->method('getFont')
                  ->with($document)
                  ->will($this->returnValue($fontTypeMock));
-                       
+
         $gc = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
                        ->getMock();
 
         $expectedXCoord = $point->getX() + $positionTranslation - $childMarginLeft;
         //padding-top has influence also on position of enumeration symbol
         $expectedYCoord = $point->getY() - $fontSize - $paddingTop;
-        
+
         $i = 0;
         $gc->expects($this->at($i++))
            ->method('saveGS');
@@ -116,7 +116,7 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
         $gc->expects($this->at($i++))
            ->method('setFont')
            ->with($fontTypeMock, $fontSize);
-        
+
         $gc->expects($this->at($i++))
            ->method('drawText')
            ->with($expectedText, $expectedXCoord, $expectedYCoord, $encoding);
@@ -127,7 +127,7 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
         $this->strategy->setVisualIndex($elementIndex+1);
         $this->strategy->drawEnumeration($document, $listMock, $gc);
     }
-    
+
     public function integerProvider()
     {
         return array(
@@ -136,13 +136,13 @@ abstract class EnumerationStrategyTest extends \PHPPdf\PHPUnit\Framework\TestCas
             array(12, Point::getInstance(100, 300), BasicList::LIST_POSITION_INSIDE, 40, $this->getElementPattern(1), 5)
         );
     }
-    
+
     abstract protected function getExpectedText($elementIndex, $elementPattern);
-    
+
     abstract protected function getElementPattern($index);
-    
+
     abstract protected function setElementPattern($list, $pattern);
-    
+
     protected function getListMockedMethod()
     {
         return array();

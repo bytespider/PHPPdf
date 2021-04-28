@@ -9,8 +9,8 @@ use PHPPdf\Core\Engine\Font;
 class AbstractFontTest extends TestCase
 {
     private $font;
-    
-    public function setUp()
+
+    public function setUp(): void
     {
         $this->font = new StubFont(array(
             Font::STYLE_NORMAL => TEST_RESOURCES_DIR.'/font-judson/normal.ttf',
@@ -22,19 +22,19 @@ class AbstractFontTest extends TestCase
 
     /**
      * @test
-     * @expectedException \InvalidArgumentException
      */
     public function creationWithEmptyArray()
     {
+        $this->expectException(\InvalidArgumentException::class);
         new StubFont(array());
     }
 
     /**
      * @test
-     * @expectedException \InvalidArgumentException
      */
     public function creationWithInvalidFontTypes()
     {
+        $this->expectException(\InvalidArgumentException::class);
         new StubFont(array(
             Font::STYLE_BOLD => TEST_RESOURCES_DIR.'/font-judson/bold.ttf',
             Font::STYLE_NORMAL => TEST_RESOURCES_DIR.'/font-judson/normal.ttf',
@@ -44,10 +44,10 @@ class AbstractFontTest extends TestCase
 
     /**
      * @test
-     * @expectedException \InvalidArgumentException
      */
     public function creationWithoutNormalFont()
     {
+        $this->expectException(\InvalidArgumentException::class);
         new StubFont(array(
             Font::STYLE_BOLD => TEST_RESOURCES_DIR.'/font-judson/normal.ttf',
         ));

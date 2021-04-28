@@ -5,7 +5,7 @@ namespace PHPPdf\Test\Helper;
 
 use PHPPdf\Core\Node\Node;
 
-class NodeAssert extends \PHPUnit_Framework_Assert
+class NodeAssert extends \PHPUnit\Framework\Assert
 {
     private $node;
 
@@ -55,4 +55,4 @@ class NodeAssert extends \PHPUnit_Framework_Assert
         $this->assertEquals($this->node->getParent()->getWidthWithoutPaddings(), $this->node->getWidth());
         return $this;
     }
-} 
+}

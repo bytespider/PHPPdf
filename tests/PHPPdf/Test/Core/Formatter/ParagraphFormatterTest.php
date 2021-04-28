@@ -14,21 +14,21 @@ use PHPPdf\ObjectMother\NodeObjectMother;
 class ParagraphFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $objectMother;
-    
+
     private $formatter;
     private $document;
-    
+
     protected function init()
     {
         $this->objectMother = new NodeObjectMother($this);
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new ParagraphFormatter();
         $this->document = $this->createDocumentStub();
     }
-    
+
     /**
      * @test
      * @dataProvider dataProvider
@@ -37,42 +37,42 @@ class ParagraphFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $paragraph = $this->createParagraph($x, $height, $width, $height);
         $this->createTextNodesAndAddToParagraph($wordsSizes, $fontSizes, $paragraph);
-        
+
         $this->formatter->format($paragraph, $this->document);
-        
+
         foreach($paragraph->getChildren() as $i => $textNode)
         {
             $this->assertPointEquals($expectedPositions[$i][0], $textNode->getFirstPoint(), sprintf('%%sfirst point of "%d" text is invalid', $i));
             $this->assertPointEquals($expectedPositions[$i][1], $textNode->getDiagonalPoint(), sprintf('%%sdiagonal point of "%d" text is invalid', $i));
         }
     }
-    
+
     private function assertPointEquals($expectedPoint, $actualPoint, $message = '')
     {
-        $this->assertEquals($expectedPoint[0], $actualPoint[0], sprintf($message, 'coord x of '), 1);
-        $this->assertEquals($expectedPoint[1], $actualPoint[1], sprintf($message, 'coord y of '), 1);
+        $this->assertEqualsWithDelta($expectedPoint[0], $actualPoint[0], 1, sprintf($message, 'coord x of '));
+        $this->assertEqualsWithDelta($expectedPoint[1], $actualPoint[1], 1, sprintf($message, 'coord y of '));
     }
-        
+
     public function dataProvider()
     {
         $lineHeightFor15 = $this->getLineHeight(15);
         $lineHeightFor12 = $this->getLineHeight(12);
-        
+
         return array(
             array(
                 2,
-                25, 
+                25,
                 200,
                 array(15, 12),
                 array(
                     array(
                         array('some', 'another'),
                         array(10, 12),
-                    ),                    
+                    ),
                     array(
                         array('some', 'another', 'anotherYet'),
                         array(10, 12, 15),
-                    ),                    
+                    ),
                 ),
                 array(
                     //expected position for 1st text
@@ -142,20 +142,20 @@ class ParagraphFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             ),
         );
     }
-    
+
     private function createParagraph($x, $y, $width, $height)
     {
         $parent = new Container();
         $parent->setWidth($width);
         $paragraph = new Paragraph();
         $parent->add($paragraph);
-        
+
         $boundary = $this->objectMother->getBoundaryStub($x, $y, $width, $height);
         $this->invokeMethod($paragraph, 'setBoundary', array($boundary));
-        
+
         return $paragraph;
     }
-    
+
     private function createTextNodesAndAddToParagraph(array $wordsSizes, array $fontSizes, Paragraph $paragraph)
     {
         foreach($wordsSizes as $index => $wordsSizesForNode)
@@ -163,36 +163,36 @@ class ParagraphFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             $this->createTextNode($wordsSizesForNode, $fontSizes[$index], $paragraph);
         }
     }
-    
+
     private function createTextNode(array $wordsSizes, $fontSize, Paragraph $paragraph)
     {
         $textNode = new Text();
-        
+
         list($words, $sizes) = $wordsSizes;
         $textNode->setWordsSizes($words, $sizes);
         $textNode->setFontSize($fontSize);
-        
+
         $paragraph->add($textNode);
-        
+
         return $textNode;
     }
-    
+
     private function getLineHeight($fontSize)
     {
         return $fontSize*1.2;
     }
-    
+
     /**
      * @test
      */
     public function useWidthOfAncestorIfParagraphParentsWidthIsNull()
     {
-        $width = 300;        
-        $grandparent = $this->objectMother->getNodeStub(0, 500, $width, 100);        
+        $width = 300;
+        $grandparent = $this->objectMother->getNodeStub(0, 500, $width, 100);
         $paragraph = $this->createParagraph(0, 500, 0, 100);
 
         $grandparent->add($paragraph->getParent());
-        
+
         $wordsSizes = array(10, 20, 30);
         $text = $this->createTextNode(array(
             array('ab', 'cd', 'ef'),
@@ -200,7 +200,7 @@ class ParagraphFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         ), 12, $paragraph);
 
         $this->formatter->format($paragraph, $this->document);
-        
+
         $this->assertEquals(1, count($paragraph->getLines()));
     }
 }

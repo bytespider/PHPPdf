@@ -13,7 +13,7 @@ class PageBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $page;
     private $formatter;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->page = new DynamicPage();
         $this->formatter = new PageBreakingFormatter();
@@ -81,7 +81,7 @@ class PageBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private function getContainerMock($start, $end, array $methods = array())
     {
         $methods = array_merge(array('getBoundary', 'getHeight'), $methods);
-        $mock = $this->getMock('PHPPdf\Core\Node\Container', $methods);
+        $mock = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods($methods)->getMock();
 
         $boundary = new Boundary();
         $boundary->setNext($start[0], $start[1])
@@ -159,7 +159,7 @@ class PageBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function pageShouldBeBreakIfBreakAttributeIsUsed()
     {
-        $prototype = $this->getMock('PHPPdf\Core\Node\Page', array('copy'));
+        $prototype = $this->getMockBuilder('PHPPdf\Core\Node\Page')->setMethods(array('copy'))->getMock();
         $prototype->expects($this->exactly(2))
                   ->method('copy')
                   ->will($this->returnValue($prototype));
@@ -196,7 +196,7 @@ class PageBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $diagonalPoint = Point::getInstance(100, 10);
 
-        $prototype = $this->getMock('PHPPdf\Core\Node\Page', array('copy', 'getHeight', 'getDiagonalPoint'));
+        $prototype = $this->getMockBuilder('PHPPdf\Core\Node\Page')->setMethods(array('copy', 'getHeight', 'getDiagonalPoint'))->getMock();
         $this->page->setMarginBottom(10);
         $prototype->expects($this->exactly(1))
                   ->method('copy')

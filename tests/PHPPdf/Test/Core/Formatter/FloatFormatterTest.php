@@ -17,9 +17,9 @@ class FloatFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $formatter = null;
     private $document;
 
-    public function setUp()
+    public function setUp(): void
     {
-        $this->formatter = new FloatFormatter();        
+        $this->formatter = new FloatFormatter();
         $this->document = $this->createDocumentStub();
     }
 
@@ -44,7 +44,7 @@ class FloatFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $args = func_get_args();
         $numArgs = func_num_args();
-        
+
         $container = $this->getNodeMock($args[0][0], $args[0][1], $args[0][2], $args[0][3], array('getChildren'));
 
         $children = array();
@@ -58,7 +58,7 @@ class FloatFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $container->expects($this->atLeastOnce())
                   ->method('getChildren')
                   ->will($this->returnValue($children));
-        
+
         return array_merge(array($container), $children);
     }
 
@@ -66,7 +66,7 @@ class FloatFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private function getNodeMock($x, $y, $width, $height, array $methods = array(), $boundaryAtLeastOnce = true, $class = 'PHPPdf\Core\Node\Container')
     {
         $methods = array_merge(array('getBoundary', 'getHeight', 'getWidth'), $methods);
-        $mock = $this->getMock($class, $methods);
+        $mock = $this->getMockBuilder($class)->setMethods($methods)->getMock();
 
         $boundary = new Boundary();
         $boundary->setNext($x, $y)
@@ -275,27 +275,27 @@ class FloatFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $this->formatter->format($container, $this->document);
     }
-    
+
     /**
      * @test
      */
     public function containerWithoutFloatShouldBeBelowAllOfPreviousSiblingsWithFloat()
     {
         $container = $this->getNodeMock(0, 500, 100, 500, array('getChildren', 'setHeight'), false);
-        
+
         $containerLeftFloated = $this->getNodeMockWithFloatAndParent(0, 500, 10, 200, 'left', $container);
         $containerRightFloated = $this->getNodeMockWithFloatAndParent(0, 300, 10, 100, 'right', $container);
         $containerWithoutFloat = $this->getNodeMockWithFloatAndParent(0, 200, 10, 100, 'none', $container);
-        
+
         $container->expects($this->atLeastOnce())
                   ->method('getChildren')
                   ->will($this->returnValue(array($containerLeftFloated, $containerRightFloated, $containerWithoutFloat)));
-                  
+
         $this->formatter->format($container, $this->document);
-        
+
         $this->assertEquals($containerLeftFloated->getDiagonalPoint()->getY(), $containerWithoutFloat->getFirstPoint()->getY());
     }
-    
+
     /**
      * @test
      * @dataProvider paddingProvider
@@ -305,35 +305,35 @@ class FloatFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $heightOfParentContainer = 500;
         $widthOfParentContainer = 500;
         $container = $this->getNodeMock(0, $heightOfParentContainer, $widthOfParentContainer, $heightOfParentContainer, array('getChildren', 'setHeight'), false);
-        
+
         $widthOfFirstContainer = 300;
         $firstPointYCoordOfSecondContainer = $heightOfParentContainer - $heightOfFirstContainer;// - $paddingTopOfSecondContainer;
         $heightOfSecondContainer = 100;
         $widthOfSecondContainer = 300;
-        
+
         $firstContainer = $this->getNodeMockWithFloatAndParent(0, $heightOfParentContainer, $widthOfFirstContainer, $heightOfFirstContainer, $firstContainerFloat, $container);
         $secondContainer = $this->getNodeMockWithFloatAndParent(0, $firstPointYCoordOfSecondContainer, $widthOfSecondContainer, $heightOfSecondContainer, $secondContainerFloat, $container);
         $secondContainer->setAttribute('padding-top', $paddingTopOfSecondContainer);
-        
+
         $container->expects($this->atLeastOnce())
                   ->method('getChildren')
                   ->will($this->returnValue(array($firstContainer, $secondContainer)));
-                  
+
         $this->formatter->format($container, $this->document);
-        
+
         $expectedXCoordOfFirstContainer = $firstContainerFloat == Node::FLOAT_LEFT ? 0 : ($widthOfParentContainer - $widthOfSecondContainer);
         $this->assertEquals($expectedXCoordOfFirstContainer, $firstContainer->getFirstPoint()->getX());
-        
+
         $expectedXCoordOfSecondContainer = $secondContainerFloat == Node::FLOAT_LEFT ? 0 : ($widthOfParentContainer - $widthOfSecondContainer);
         $this->assertEquals($expectedXCoordOfSecondContainer, $secondContainer->getFirstPoint()->getX());
-        
-        
+
+
         $this->assertEquals($heightOfParentContainer, $firstContainer->getFirstPoint()->getY());
-        
+
         $expectedYCoordOfSecondContainer = $heightOfParentContainer - $heightOfFirstContainer;
         $this->assertEquals($expectedYCoordOfSecondContainer, $secondContainer->getFirstPoint()->getY());
     }
-    
+
     public function paddingProvider()
     {
         return array(
@@ -345,7 +345,7 @@ class FloatFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array('right', 'right', 200, 10),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider floatAndMarginProvider
@@ -356,16 +356,16 @@ class FloatFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $containerFloated = $this->getNodeMockWithFloatAndParent(0, 500, $width, 200, $float, $container);
         $containerFloated->setAttribute('margin-left', $marginLeft);
         $containerFloated->setAttribute('margin-right', $marginRight);
-        
+
         $container->expects($this->atLeastOnce())
                   ->method('getChildren')
                   ->will($this->returnValue(array($containerFloated)));
-                  
+
         $this->formatter->format($container, $this->document);
-        
+
         $this->assertEquals($expectedXCoord, $containerFloated->getFirstPoint()->getX());
     }
-    
+
     public function floatAndMarginProvider()
     {
         return array(

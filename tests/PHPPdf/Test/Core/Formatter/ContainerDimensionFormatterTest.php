@@ -19,7 +19,7 @@ class ContainerDimensionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->objectMother = new NodeObjectMother($this);
     }
     
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new ContainerDimensionFormatter();
     }

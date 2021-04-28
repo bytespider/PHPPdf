@@ -15,7 +15,7 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $column;
     private $formatter;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->page = new Page();
         $this->column = new ColumnableContainer();
@@ -54,7 +54,7 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $containersHeight = array($pageHeight, $pageHeight/2, $pageHeight/3);
         $this->column->setHeight(array_sum($containersHeight));
         $this->injectBoundary($this->column);
-        
+
         $containers = $this->createContainers($containersHeight);
 
         $this->formatter->format($this->page, $this->createDocumentStub());
@@ -66,20 +66,20 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             $children = $container->getChildren();
             $firstChild = current($children);
             $expectedFirstPoint = $firstChild->getFirstPoint();
-            
+
             $lastIndex = count($children) - 1;
             $lastChild = $children[$lastIndex];
             $expectedDiagonalYCoord = min($lastChild->getDiagonalPoint()->getY(), $firstChild->getDiagonalPoint()->getY());
             $actualDiagonalYCoord = $container->getDiagonalPoint()->getY();
 
-            $this->assertEquals($expectedFirstPoint->getX(), $container->getFirstPoint()->getX(), 'x coord of columns\' first point isn\'t equals', 0.000001);
-            $this->assertEquals($expectedFirstPoint->getY(), $container->getFirstPoint()->getY(), 'y coord of columns\' first point isn\'t equals', 0.000001);
-            $this->assertEquals($expectedDiagonalYCoord, $actualDiagonalYCoord, 'two columns haven\'t the same height', 0.000001);
+            $this->assertEqualsWithDelta($expectedFirstPoint->getX(), $container->getFirstPoint()->getX(), 0.000001, 'x coord of columns\' first point isn\'t equals');
+            $this->assertEqualsWithDelta($expectedFirstPoint->getY(), $container->getFirstPoint()->getY(), 0.000001, 'y coord of columns\' first point isn\'t equals');
+            $this->assertEqualsWithDelta($expectedDiagonalYCoord, $actualDiagonalYCoord, 0.000001, 'two columns haven\'t the same height');
         }
 
-        $this->assertEquals($containers[1]->getFirstPoint()->getX(), $containers[2]->getFirstPoint()->getX(), 'x coord of two containers within the same column is not equal', 0.000001);
+        $this->assertEqualsWithDelta($containers[1]->getFirstPoint()->getX(), $containers[2]->getFirstPoint()->getX(), 0.000001, 'x coord of two containers within the same column is not equal');
 
-        $this->assertEquals($pageHeight, $this->column->getHeight(), 'height of page isn\'t equals to the highest column', 0.000001);
+        $this->assertEqualsWithDelta($pageHeight, $this->column->getHeight(), 0.000001, 'height of page isn\'t equals to the highest column');
     }
 
     private function createContainers(array $heights, $parent = null)
@@ -118,8 +118,8 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $containersHeights = array($pageHeight, $pageHeight, $pageHeight);
         $this->column->setHeight(array_sum($containersHeights));
-        $this->injectBoundary($this->column);       
-        
+        $this->injectBoundary($this->column);
+
         $containers = $this->createContainers($containersHeights);
 
         $this->formatter->format($this->page, $this->createDocumentStub());
@@ -159,33 +159,33 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             }
         }
     }
-    
+
     /**
      * @test
      */
     public function calculateCorrectBreakPointWhenColumnStartsInMiddleOfPage()
     {
         $pageHeight = $this->page->getHeight();
-        
+
         $heightOfFirstContainer = 20;
-               
+
         list($fistContainer, $columnableContainerChild) = $this->createContainers(array($heightOfFirstContainer, 4*$pageHeight - 2*$heightOfFirstContainer), $this->page);
         $this->column->add($columnableContainerChild);
         $this->page->add($this->column);
-        
+
         $this->column->setHeight($columnableContainerChild->getHeight());
         $this->injectBoundary($this->column, $heightOfFirstContainer);
-        
+
         $this->formatter->format($this->page, $this->createDocumentStub());
-        
+
         $this->assertEquals(4, count($this->column->getChildren()));
-        
+
         foreach($this->column->getChildren() as $container)
         {
             $this->assertEquals(0, $container->getDiagonalPoint()->getY() % $pageHeight, 'y coord of one container\'s bottom is not equal to page bottom');
         }
     }
-    
+
     /**
      * @test
      */
@@ -194,18 +194,18 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->page->add($this->column);
         $pageHeight = $this->page->getHeight();
         $this->column->setAttribute('equals-columns', true);
-        
+
         $containerHeights = array($pageHeight/4, $pageHeight/4);
         $this->column->setHeight(array_sum($containerHeights));
         $this->injectBoundary($this->column);
-        
+
         $containers = $this->createContainers($containerHeights);
-        
+
         $this->formatter->format($this->page, $this->createDocumentStub());
-        
+
         $this->assertEquals(2, count($this->column->getChildren()));
     }
-    
+
     /**
      * @test
      */
@@ -213,20 +213,20 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $pageHeight = $this->page->getHeight();
         $this->column->setAttribute('equals-columns', true);
-        
+
         $heightOfFirstContainer = 20;
-               
+
         list($fistContainer, $columnableContainerChild) = $this->createContainers(array($heightOfFirstContainer, 2*$pageHeight), $this->page);
         $this->column->add($columnableContainerChild);
         $this->page->add($this->column);
-        
+
         $this->column->setHeight($columnableContainerChild->getHeight());
         $this->injectBoundary($this->column, $heightOfFirstContainer);
-        
+
         $this->formatter->format($this->page, $this->createDocumentStub());
-        
+
         $this->assertEquals(4, count($this->column->getChildren()));
-        
+
         foreach($this->column->getChildren() as $i => $container)
         {
             if($i < 2)
@@ -237,11 +237,11 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
             {
                 $expectedYCoord = $this->page->getDiagonalPoint()->getY();
             }
-            
+
             $this->assertEquals($expectedYCoord, $container->getFirstPoint()->getY());
         }
     }
-    
+
     /**
      * @test
      */
@@ -249,25 +249,25 @@ class ColumnBreakingFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $pageHeight = $this->page->getHeight();
         $this->page->add($this->column);
-        
+
         $containerHeights = array($pageHeight/4, $pageHeight/4, 1, $pageHeight/4, $pageHeight/4, 1, $pageHeight*2.5, 1, $pageHeight/4);
         $totalHeight = array_sum($containerHeights);
-        $this->column->setHeight($totalHeight);  
+        $this->column->setHeight($totalHeight);
         $this->injectBoundary($this->column);
-        
+
         $containers = $this->createContainers($containerHeights);
-        
+
         foreach(array(2, 5, 7) as $index)
         {
             $containers[$index]->setAttribute('break', true);
         }
 
         $this->formatter->format($this->page, $this->createDocumentStub());
-        
+
         $this->assertEquals(6, count($this->column->getChildren()));
-        
+
         $columns = $this->column->getChildren();
-        
+
         for($i=0, $count=count($columns); $i<$count; $i++)
         {
             if($i < ($count-1))

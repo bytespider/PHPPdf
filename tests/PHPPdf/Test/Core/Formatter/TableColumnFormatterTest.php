@@ -16,7 +16,7 @@ class TableColumnFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->objectMother = new TableObjectMother($this);
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new TableColumnFormatter();
     }
@@ -27,7 +27,18 @@ class TableColumnFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function spreadEventlyColumnsWidth(array $cellsInRowsWidths, array $columnsWidths, $tableWidth)
     {
-        $table = $this->getMock('PHPPdf\Core\Node\Table', array('reduceColumnsWidthsByMargins', 'getWidthsOfColumns', 'getChildren', 'getWidth', 'getNumberOfColumns', 'getMarginsLeftOfColumns', 'getMarginsRightOfColumns', 'convertRelativeWidthsOfColumns'));
+        $table = $this->getMockBuilder('PHPPdf\Core\Node\Table')
+                      ->setMethods(array(
+                          'reduceColumnsWidthsByMargins',
+                          'getWidthsOfColumns',
+                          'getChildren',
+                          'getWidth',
+                          'getNumberOfColumns',
+                          'getMarginsLeftOfColumns',
+                          'getMarginsRightOfColumns',
+                          'convertRelativeWidthsOfColumns'
+                      ))
+                      ->getMock();
         $totalColumnsWidth = array_sum($columnsWidths);
         $numberOfColumns = count($columnsWidths);
         $enlargeColumnWidth = ($tableWidth - $totalColumnsWidth)/$numberOfColumns;
@@ -45,7 +56,7 @@ class TableColumnFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
                 $cells[] = $cell;
             }
 
-            $row = $this->getMock('PHPPdf\Core\Node\Table\Row', array('getChildren'));
+            $row = $this->getMockBuilder('PHPPdf\Core\Node\Table\Row')->setMethods(array('getChildren'))->getMock();
             $row->expects($this->atLeastOnce())
                 ->method('getChildren')
                 ->will($this->returnValue($cells));

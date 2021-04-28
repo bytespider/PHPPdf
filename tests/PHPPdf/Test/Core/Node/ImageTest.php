@@ -16,10 +16,10 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
     const IMAGE_X_COORD = 0;
     const IMAGE_Y_COORD = 100;
     const IMAGE_PATH = 'image/path';
-    
+
     private $image;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->image = new Image(array(
             'width' => 100,
@@ -33,7 +33,7 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
                  ->setNext(self::IMAGE_X_COORD, self::IMAGE_Y_COORD - self::IMAGE_HEIGHT)
                  ->close();
     }
-    
+
     /**
      * @test
      * @dataProvider drawImageInExpectedPositionProvider
@@ -42,15 +42,15 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $this->image->setAttribute('src', self::IMAGE_PATH);
         $this->image->setAttribute('keep-ratio', $keepRatio);
-        
-        $imageResource = $this->getMock('PHPPdf\Core\Engine\Image');
+
+        $imageResource = $this->getMockBuilder('PHPPdf\Core\Engine\Image')->getMock();
         $imageResource->expects($this->any())
                       ->method('getOriginalWidth')
                       ->will($this->returnValue($sourceWidth));
         $imageResource->expects($this->any())
                       ->method('getOriginalHeight')
                       ->will($this->returnValue($sourceHeight));
-        
+
         $document = $this->getMockBuilder('PHPPdf\Core\Document')
                          ->setMethods(array('createImage'))
                          ->disableOriginalConstructor()
@@ -60,8 +60,8 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
                  ->method('createImage')
                  ->with(self::IMAGE_PATH)
                  ->will($this->returnValue($imageResource));
-                 
-        $pageMock = $this->getMock('PHPPdf\Core\Node\Page', array('getGraphicsContext'));      
+
+        $pageMock = $this->getMockBuilder('PHPPdf\Core\Node\Page')->setMethods(array('getGraphicsContext'))->getMock();
 
         $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
         			   ->getMock();
@@ -70,14 +70,14 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $expectedYCoord = self::IMAGE_Y_COORD;
         $expectedWidth = self::IMAGE_WIDTH;
         $expectedHeight = self::IMAGE_HEIGHT;
-        
+
         $drawExpectation = $gcMock->expects($this->once())
                                   ->method('drawImage');
-        
+
         if($keepRatio)
         {
             $sourceRatio = $sourceHeight / $sourceWidth;
-            
+
             $gcMock->expects($this->once())
                    ->method('clipRectangle')
                    ->id('clipRectangleInvocation')
@@ -96,7 +96,7 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
                 $expectedXCoord -= ($expectedWidth - self::IMAGE_WIDTH)/2;
             }
         }
-        			   
+
         $drawExpectation->with($imageResource, $expectedXCoord, $expectedYCoord-$expectedHeight, $expectedXCoord + $expectedWidth, $expectedYCoord);
 
         $pageMock->expects($this->once())
@@ -113,7 +113,7 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
             $task->invoke();
         }
     }
-    
+
     public function drawImageInExpectedPositionProvider()
     {
         return array(
@@ -122,7 +122,7 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(true, 100, 200),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider dataProvider
@@ -132,12 +132,12 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->image->setWidth($width);
         $this->image->setMarginLeft($marginLeft);
         $this->image->setMarginRight($marginRight);
-        
+
         $expectedMinWidth = $width + $marginLeft + $marginRight;
-        
+
         $this->assertEquals($expectedMinWidth, $this->image->getMinWidth());
     }
-    
+
     public function dataProvider()
     {
         return array(
@@ -145,7 +145,7 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(100, 5, 6),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider handleImageExceptionWhenIgnoreErrorAttributeIsOnProvider
@@ -153,9 +153,9 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
     public function handleImageExceptionWhenIgnoreErrorAttributeIsOn($ignoreError, $invalidSrc)
     {
         $this->givenImageWithIgnoreError($ignoreError);
-        
-        $engine = $this->getMock('PHPPdf\Core\Engine\Engine');
-        $engineImage = $this->getMock('PHPPdf\Core\Engine\Image');
+
+        $engine = $this->getMockBuilder('PHPPdf\Core\Engine\Engine')->getMock();
+        $engineImage = $this->getMockBuilder('PHPPdf\Core\Engine\Image')->getMock();
 
         if($invalidSrc)
         {
@@ -169,12 +169,12 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
         try
         {
             $actualSource = $this->image->createSource($engine);
-            
+
             if(!$ignoreError && $invalidSrc)
             {
                 $this->fail('error shouldn\'t be ignored');
             }
-            
+
             if($invalidSrc)
             {
                 $this->assertInstanceOf('PHPPdf\Core\Engine\EmptyImage', $actualSource);
@@ -241,10 +241,10 @@ class ImageTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Exception\InvalidResourceException
      */
     public function turnOffIgnoreErrorAttribute_errorOccursOnPreFormat_throwException()
     {
+        $this->expectException(\PHPPdf\Exception\InvalidResourceException::class);
         $this->givenImageWithIgnoreError(false);
         $this->clearImageSize();
 

@@ -9,17 +9,17 @@ abstract class BaseFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $formatter;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new StubFormatter();
     }
 
     /**
      * @test
-     * @expectedException \LogicException
      */
     public function throwExceptionIfTryToGetUnsettedDocument()
     {
+        $this->expectException(\LogicException::class);
         $this->formatter->getDocument();
     }
 
@@ -36,10 +36,10 @@ abstract class BaseFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException \LogicException
      */
     public function unserializedFormatterHaveDocumentDetached()
     {
+        $this->expectException(\LogicException::class);
         $document = $this->createDocumentStub();
         $this->formatter->setDocument($document);
 

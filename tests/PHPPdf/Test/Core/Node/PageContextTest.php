@@ -13,7 +13,7 @@ class PageContextTest extends \PHPPdf\PHPUnit\Framework\TestCase
     public function gettingNumberOfPages()
     {
         $numberOfPages = 5;
-        $mock = $this->getMock('PHPPdf\Core\Node\DynamicPage', array('getNumberOfPages'));
+        $mock = $this->getMockBuilder('PHPPdf\Core\Node\DynamicPage')->setMethods(array('getNumberOfPages'))->getMock();
         $mock->expects($this->atLeastOnce())
              ->method('getNumberOfPages')
              ->will($this->returnValue($numberOfPages));

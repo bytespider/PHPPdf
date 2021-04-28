@@ -2,6 +2,7 @@
 
 namespace PHPPdf\Test\Core\Parser;
 
+use PHPPdf\Core\Document;
 use PHPPdf\Core\Node\Container;
 use PHPPdf\Core\Node\Paragraph;
 use PHPPdf\Core\Node\Text;
@@ -17,15 +18,17 @@ class XmlDocumentParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $documentMock;
     private $complexAttributeFactoryMock;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->documentMock = $this->getMockBuilder('PHPPdf\Core\Document')
                                    ->disableOriginalConstructor()
                                    ->setMethods(array('setMetadataValue'))
                                    ->disableOriginalConstructor()
                                    ->getMock();
-        
-        $this->complexAttributeFactoryMock = $this->getMock('PHPPdf\Core\ComplexAttribute\ComplexAttributeFactory', array('create', 'getDefinitionNames'));
+
+        $this->complexAttributeFactoryMock = $this->getMockBuilder('PHPPdf\Core\ComplexAttribute\ComplexAttributeFactory')
+             ->setMethods(array('create', 'getDefinitionNames'))
+             ->getMock();
 
         $this->parser = new XmlDocumentParser($this->complexAttributeFactoryMock, $this->documentMock);
     }
@@ -38,7 +41,7 @@ class XmlDocumentParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $factory = new NodeFactory();
 
         $this->assertTrue($this->parser->getNodeFactory() instanceof NodeFactory);
-        
+
         $this->parser->setNodeFactory($factory);
 
         $this->assertTrue($factory === $this->parser->getNodeFactory());
@@ -46,10 +49,10 @@ class XmlDocumentParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\InvalidTagException
      */
     public function invalidRoot()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\InvalidTagException::class);
         $xml = '<invalid-root></invalid-root>';
 
         $this->parser->parse($xml);
@@ -69,10 +72,10 @@ class XmlDocumentParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function throwsExceptionIfTagDosntExistsInFactory()
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $xml = '<pdf><tag1 /></pdf>';
 
         $this->parser->parse($xml);
@@ -116,16 +119,16 @@ class XmlDocumentParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array($reader),
         );
     }
-    
+
     private function getNodeFactoryMock(array $mocks = array(), $indexStep = 1, $excatly = false)
     {
-        $factoryMock = $this->getMock('PHPPdf\Core\Node\NodeFactory', array('create'));
-        
+        $factoryMock = $this->getMockBuilder('PHPPdf\Core\Node\NodeFactory')->setMethods(array('create'))->getMock();
+
         $index = 0;
         foreach($mocks as $mockData)
         {
             list($tag, $mock) = $mockData;
-            
+
             $expection = $excatly ? $this->exactly($excatly) : $this->at($index);
             $factoryMock->expects($expection)
                         ->method('create')
@@ -147,7 +150,7 @@ class XmlDocumentParserTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     private function createNodeMock($baseClass = 'PHPPdf\Core\Node\Page', $methods = array(), $setParentExpectation = true)
     {
-        $nodeMock = $this->getMock($baseClass, array_merge(array('setParent', 'setAttribute'), $methods));
+        $nodeMock = $this->getMockBuilder($baseClass)->setMethods(array_merge(array('setParent', 'setAttribute'), $methods))->getMock();
         if($setParentExpectation)
         {
             $nodeMock->expects($this->once())
@@ -210,7 +213,7 @@ XML;
         $factoryMock = $this->getNodeFactoryMock($mocks);
 
         $this->parser->setNodeFactory($factoryMock);
-        
+
         $pageCollection = $this->parser->parse($xml);
 
         $this->assertOnlyChild($nodeMock1, $pageCollection);
@@ -261,7 +264,7 @@ XML;
         $this->assertOnlyChild($paragraphMock, $nodeMock);
         $this->assertOnlyChild($textMock, $paragraphMock);
     }
-    
+
     /**
      * @test
      */
@@ -283,16 +286,16 @@ XML;
         $text1Mock = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Text', array('setText'));
         $paragraph2Mock = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Paragraph');
         $text2Mock = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Text', array('setText'));
-        
+
         $mocks = array(array('tag1', $tag1Mock), array('paragraph', $paragraph1Mock), array('text', $text1Mock), array('tag2', $tag2Mock), array('paragraph', $paragraph2Mock), array('text', $text2Mock));
-        
+
         $factoryMock = $this->getNodeFactoryMock($mocks);
 
         $this->parser->setNodeFactory($factoryMock);
 
         $pageCollection = $this->parser->parse($xml);
     }
-    
+
     /**
      * @test
      */
@@ -307,15 +310,15 @@ XML;
         $text1Mock = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Text', array('setText'));
         $text2Mock = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Text', array('setText'));
         $text3Mock = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Text', array('setText'), false);
-        
+
         $mocks = array(array('paragraph', $paragraphMock), array('text', $text1Mock), array('span', $text2Mock), array('text', $text3Mock));
-        
+
         $factoryMock = $this->getNodeFactoryMock($mocks);
 
         $this->parser->setNodeFactory($factoryMock);
 
         $pages = $this->parser->parse($xml);
-        
+
         $this->assertOnlyChild($paragraphMock, $pages);
         $children = $paragraphMock->getChildren();
         $this->assertEquals(2, count($children));
@@ -342,7 +345,7 @@ XML;
 
         $nodeMock2->expects($this->never())
                    ->method('setAttribute');
-        
+
         $nodeMock1->expects($this->once())
                    ->method('copy')
                    ->will($this->returnValue($nodeMock2));
@@ -357,10 +360,10 @@ XML;
 
     /**
      * @test
-     * @expectedException \PHPPdf\Core\Parser\Exception\DuplicatedIdException
      */
     public function idMustBeUnique()
     {
+        $this->expectException(\PHPPdf\Core\Parser\Exception\DuplicatedIdException::class);
         $xml = <<<XML
 <pdf>
     <tag1 id="node">
@@ -370,7 +373,7 @@ XML;
 XML;
         $nodeMock1 = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Page', array(), false);
         $nodeMock2 = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Page', array(), false);
-        
+
         $mocks = array(array('tag1', $nodeMock1), array('tag2', $nodeMock2));
         $factoryMock = $this->getNodeFactoryMock($mocks);
 
@@ -381,10 +384,10 @@ XML;
 
     /**
      * @test
-     * @expectedException \PHPPdf\Core\Parser\Exception\IdNotFoundException
      */
     public function extendsAfterUnexistedIdIsForbidden()
     {
+        $this->expectException(\PHPPdf\Core\Parser\Exception\IdNotFoundException::class);
         $xml = '<pdf><tag extends="id" /></pdf>';
 
         $factoryMock = $this->getNodeFactoryMock();
@@ -448,22 +451,23 @@ XML;
         $reader->read();
         $reader->read();
 
-        $constraintMock = $this->getMock('PHPPdf\Core\Parser\StylesheetConstraint', array('apply'));
+        $constraintMock = $this->getMockBuilder('PHPPdf\Core\Parser\StylesheetConstraint')->setMethods(array('apply'))->getMock();
         $constraintMock->expects($this->once())
                        ->method('apply')
                        ->with($this->isInstanceOf('PHPPdf\Core\Node\Page'));
 
-        $parserMock = $this->getMock('PHPPdf\Core\Parser\StylesheetParser', array('parse'));
+        $parserMock = $this->getMockBuilder('PHPPdf\Core\Parser\StylesheetParser')->setMethods(array('parse'))->getMock();
         $parserMock->expects($this->once())
-                   ->method('parse') 
-                   //move after stylesheet close tag and return constraint                  
+                   ->method('parse')
+                   //move after stylesheet close tag and return constraint
                    ->will($this->returnCompose(array(
-                       $this->returnCallback(function() use($reader){                           
+                       $this->returnCallback(function() use($reader){
                            while($reader->name != XmlDocumentParser::STYLESHEET_TAG)
                            {
                                $reader->next();
                            }
-                       }), $this->returnValue($constraintMock)
+                       }),
+                       $this->returnValue($constraintMock)
                    )));
 
 
@@ -491,7 +495,7 @@ XML;
 </pdf>
 XML;
 
-        $constraintMock = $this->getMock('PHPPdf\Core\Parser\StylesheetConstraint', array('find'));
+        $constraintMock = $this->getMockBuilder('PHPPdf\Core\Parser\StylesheetConstraint')->setMethods(array('find'))->getMock();
         $bagContainerMock1 = $this->getBagContainerMock(array('someName1' => 'someValue1'));
         $bagContainerMock2 = $this->getBagContainerMock(array('someName4' => array('someAttribute1' => 'someValue1')));
         $bagContainerMock3 = $this->getBagContainerMock(array('someName2' => 'someValue2', 'someName3' => array('someAttribute2' => 'someValue2')));
@@ -542,7 +546,7 @@ XML;
     {
         $attributes = array_merge($attributes, $complexAttributes);
 
-        $mock = $this->getMock('PHPPdf\Core\Parser\BagContainer', array('getAll'));
+        $mock = $this->getMockBuilder('PHPPdf\Core\Parser\BagContainer')->setMethods(array('getAll'))->getMock();
         $mock->expects($this->once())
              ->method('getAll')
              ->will($this->returnValue($attributes));
@@ -587,16 +591,16 @@ XML;
 XML;
 
         $height = 50;
-        $placeholderMock1 = $this->getMock('PHPPdf\Core\Node\Container', array('getHeight'));
-        $placeholderMock2 = $this->getMock('PHPPdf\Core\Node\Container', array('getHeight'));
+        $placeholderMock1 = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getHeight'))->getMock();
+        $placeholderMock2 = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('getHeight'))->getMock();
 
-        $nodeMock = $this->getMock('PHPPdf\Core\Node\Container', array('hasPlaceholder', 'setPlaceholder'));
+        $nodeMock = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('hasPlaceholder', 'setPlaceholder'))->getMock();
 
         $nodeMock->expects($this->at(0))
                   ->method('hasPlaceholder')
                   ->with($this->equalTo('placeholder'))
                   ->will($this->returnValue(true));
-        
+
         $nodeMock->expects($this->at(1))
                   ->method('setPlaceholder')
                   ->with($this->equalTo('placeholder'), $this->equalTo($placeholderMock1));
@@ -620,7 +624,7 @@ XML;
 </pdf>
 XML;
 
-        $nodeMock = $this->getMock('PHPPdf\Core\Node\Container', array('setAttribute', 'setParent'));
+        $nodeMock = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('setAttribute', 'setParent'))->getMock();
         $nodeMock->expects($this->once())
                   ->method('setAttribute')
                   ->id('attribute')
@@ -636,14 +640,14 @@ XML;
 
         $this->parser->parse($xml);
     }
-    
+
     /**
      * @test
      * @dataProvider unknownTagProvider
-     * @expectedException \PHPPdf\Parser\Exception\ParseException
      */
     public function throwParseExceptionOnUnknownTag($unknownTag)
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $xml = <<<XML
 <pdf>
     <{$unknownTag} someAttribute="someValue"></{$unknownTag}>
@@ -651,7 +655,7 @@ XML;
 XML;
         $this->parser->parse($xml);
     }
-    
+
     public function unknownTagProvider()
     {
         return array(
@@ -660,7 +664,7 @@ XML;
             array('enhancement'),
         );
     }
-    
+
     /**
      * @test
      */
@@ -672,7 +676,7 @@ XML;
 </pdf>
 XML;
 
-        $nodeMock = $this->getMock('PHPPdf\Core\Node\Container', array('setAttribute', 'mergeComplexAttributes'));
+        $nodeMock = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('setAttribute', 'mergeComplexAttributes'))->getMock();
         $nodeMock->expects($this->once())
                   ->method('setAttribute')
                   ->id('attribute')
@@ -682,7 +686,7 @@ XML;
                   ->with('someComplexAttribute', array('name' => 'someComplexAttribute', 'property' => 'propertyValue'));
 
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('tag', $nodeMock)));
-        
+
         $this->complexAttributeFactoryMock->expects($this->atLeastOnce())
                                      ->method('getDefinitionNames')
                                      ->will($this->returnValue(array('someComplexAttribute')));
@@ -691,7 +695,7 @@ XML;
 
         $this->parser->parse($xml);
     }
-    
+
     /**
      * @test
      */
@@ -703,22 +707,22 @@ XML;
 	<tag2></tag2>
 </pdf>
 XML;
-        $tag1NodeMock = $this->getMock('PHPPdf\Core\Node\Container', array('setPriorityFromParent', 'setAttribute'));
-        $tag2NodeMock = $this->getMock('PHPPdf\Core\Node\Container', array('setPriorityFromParent', 'setAttribute'));
-        
+        $tag1NodeMock = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('setPriorityFromParent', 'setAttribute'))->getMock();
+        $tag2NodeMock = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('setPriorityFromParent', 'setAttribute'))->getMock();
+
         $mocks = array(array('tag1', $tag1NodeMock), array('tag2', $tag2NodeMock));
         $nodeFactoryMock = $this->getNodeFactoryMock($mocks);
-        
+
         $this->parser->setNodeFactory($nodeFactoryMock);
 
         $pages = $this->parser->parse($xml);
-        
+
         $this->assertEquals(2, count($pages->getChildren()));
         $children = $pages->getChildren();
         $this->assertTrue($tag1NodeMock === $children[0]);
         $this->assertTrue($tag2NodeMock === $children[1]);
     }
-    
+
     /**
      * @test
      */
@@ -729,19 +733,19 @@ XML;
 	Some text
 </pdf>
 XML;
-        $textNode = $this->getMock('PHPPdf\Core\Node\Text', array('setPriorityFromParent'));
-        $paragraphNode = $this->getMock('PHPPdf\Core\Node\Paragraph', array('setPriorityFromParent'));
-        
+        $textNode = $this->getMockBuilder('PHPPdf\Core\Node\Text')->setMethods(array('setPriorityFromParent'))->getMock();
+        $paragraphNode = $this->getMockBuilder('PHPPdf\Core\Node\Paragraph')->setMethods(array('setPriorityFromParent'))->getMock();
+
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('paragraph', $paragraphNode), array('text', $textNode)));
-        
+
         $this->parser->setNodeFactory($nodeFactoryMock);
-        
+
         $pages = $this->parser->parse($xml);
-        
+
         $children = $pages->getChildren();
         $this->assertEquals(1, count($children));
     }
-    
+
     /**
      * @test
      */
@@ -753,25 +757,25 @@ XML;
 </pdf>
 XML;
 
-        $textNodeTag1 = $this->getMock('PHPPdf\Core\Node\Text', array('setPriorityFromParent'));
-        $textNodeSpace = $this->getMock('PHPPdf\Core\Node\Text', array('setPriorityFromParent', 'setText', 'getText'));
-        $paragraphNode = $this->getMock('PHPPdf\Core\Node\Paragraph', array('setPriorityFromParent'));
-        $textNodeTag2 = $this->getMock('PHPPdf\Core\Node\Text', array('setPriorityFromParent'));
-        
+        $textNodeTag1 = $this->getMockBuilder('PHPPdf\Core\Node\Text')->setMethods(array('setPriorityFromParent'))->getMock();
+        $textNodeSpace = $this->getMockBuilder('PHPPdf\Core\Node\Text')->setMethods(array('setPriorityFromParent', 'setText', 'getText'))->getMock();
+        $paragraphNode = $this->getMockBuilder('PHPPdf\Core\Node\Paragraph')->setMethods(array('setPriorityFromParent'))->getMock();
+        $textNodeTag2 = $this->getMockBuilder('PHPPdf\Core\Node\Text')->setMethods(array('setPriorityFromParent'))->getMock();
+
         $textNodeSpace->expects($this->atLeastOnce())
                        ->method('setText')
                        ->with(' ');
         $textNodeSpace->expects($this->atLeastOnce())
                        ->method('getText')
                        ->will($this->returnValue(' '));
-        
+
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('tag1', $textNodeTag1), array('paragraph', $paragraphNode), array('text', $textNodeSpace), array('tag2', $textNodeTag2)));
-        
+
         $this->parser->setNodeFactory($nodeFactoryMock);
-        
+
         $pages = $this->parser->parse($xml);
     }
-    
+
     /**
      * @test
      */
@@ -784,24 +788,24 @@ XML;
 </pdf>
 XML;
 
-        $text1Node = $this->getMock('PHPPdf\Core\Node\Text', array('setPriorityFromParent'));
-        $text2Node = $this->getMock('PHPPdf\Core\Node\Text', array('setPriorityFromParent'));
-        $tag1Node = $this->getMock('PHPPdf\Core\Node\Container', array('setPriorityFromParent'));
-        $paragraph1Node = $this->getMock('PHPPdf\Core\Node\Paragraph', array('setPriorityFromParent'));
-        $paragraph2Node = $this->getMock('PHPPdf\Core\Node\Paragraph', array('setPriorityFromParent'));
-        
+        $text1Node = $this->getMockBuilder('PHPPdf\Core\Node\Text')->setMethods(array('setPriorityFromParent'))->getMock();
+        $text2Node = $this->getMockBuilder('PHPPdf\Core\Node\Text')->setMethods(array('setPriorityFromParent'))->getMock();
+        $tag1Node = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('setPriorityFromParent'))->getMock();
+        $paragraph1Node = $this->getMockBuilder('PHPPdf\Core\Node\Paragraph')->setMethods(array('setPriorityFromParent'))->getMock();
+        $paragraph2Node = $this->getMockBuilder('PHPPdf\Core\Node\Paragraph')->setMethods(array('setPriorityFromParent'))->getMock();
+
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('tag1', $tag1Node), array('text1', $text1Node), array('paragraph', $paragraph1Node), array('text2', $text2Node), array('paragraph', $paragraph2Node)));
-        
+
         $this->parser->setNodeFactory($nodeFactoryMock);
-        
+
         $pages = $this->parser->parse($xml);
-        
+
         $this->assertEquals(2, count($pages->getChildren()));
-        
+
         $this->assertInstanceOf('PHPPdf\Core\Node\Container', $pages->getChild(0));
         $this->assertInstanceOf('PHPPdf\Core\Node\Paragraph', $pages->getChild(1));
     }
-    
+
     /**
      * @test
      */
@@ -817,13 +821,13 @@ XML;
         $text2Node = new Text();
         $text3Node = new Text();
         $paragraphNode = new Paragraph();
-        
+
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('paragraph', $paragraphNode), array('text', $text1Node), array('text1', $text2Node), array('text', $text3Node)));
-        
+
         $this->parser->setNodeFactory($nodeFactoryMock);
-        
+
         $pages = $this->parser->parse($xml);
-        
+
         foreach(array($text1Node, $text2Node) as $textNode)
         {
             $textNode->preFormat($this->documentMock);
@@ -832,7 +836,7 @@ XML;
         $this->assertEquals('another text', $text2Node->getText());
         $this->assertEquals('Some text ', $text1Node->getText());
     }
-    
+
     /**
      * @test
      */
@@ -843,15 +847,15 @@ XML;
 XML;
         $textNode = new Text();
         $paragraphNode = new Paragraph();
-        
+
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('paragraph', $paragraphNode), array('text', $textNode)));
-        
+
         $this->parser->setNodeFactory($nodeFactoryMock);
-        
+
         $pages = $this->parser->parse($xml);
         $this->assertEquals('0', $textNode->getText());
     }
-    
+
     /**
      * @test
      * @dataProvider recogniceBahaviourAttributeProvider
@@ -870,7 +874,7 @@ XML;
         $behavoiurFactory = $this->getMockBuilder('PHPPdf\Core\Node\Behaviour\Factory')
                                  ->setMethods(array('create', 'getSupportedBehaviourNames'))
                                  ->getMock();
-                                 
+
         $behavoiurFactory->expects($this->atLeastOnce())
                          ->method('getSupportedBehaviourNames')
                          ->will($this->returnValue(array('behaviour')));
@@ -878,19 +882,19 @@ XML;
                          ->method('create')
                          ->with('behaviour', $behaviourValue)
                          ->will($this->returnValue($behaviour));
-        
+
         $node = $this->getNodeMock(array(), 'PHPPdf\Core\Node\Container', array('addBehaviour'));
         $node->expects($this->once())
               ->method('addBehaviour')
               ->with($behaviour);
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('tag', $node)));
-        
+
         $this->parser->setBehaviourFactory($behavoiurFactory);
         $this->parser->setNodeFactory($nodeFactoryMock);
-        
+
         $this->parser->parse($xml);
     }
-    
+
     public function recogniceBahaviourAttributeProvider()
     {
         return array(
@@ -899,7 +903,7 @@ XML;
             array('ąęść'),
         );
     }
-    
+
 
     /**
      * @test
@@ -916,7 +920,7 @@ XML;
     </tag1>
 </pdf>
 XML;
-        $nodeMock = $this->getMock('PHPPdf\Core\Node\Container', array('addBehaviour'));
+        $nodeMock = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('addBehaviour'))->getMock();
 
         $mocks = array(array('tag1', $nodeMock));
         $nodeFactoryMock = $this->getNodeFactoryMock($mocks);
@@ -927,11 +931,11 @@ XML;
         $args = array('some text 1', 'some text 2');
         $behaviourNames = array('note', 'bookmark');
         $behaviourOptions = array(array(), array('option1' => 'value1', 'option2' => 'value2'));
-        
+
         $behaviourFactoryMock->expects($this->atLeastOnce())
                              ->method('getSupportedBehaviourNames')
                              ->will($this->returnValue($behaviourNames));
-        
+
         //first two invocations are getSupportedBehaviourNames method calls
         $behaviourFactoryCallIndex = 2;
 
@@ -944,19 +948,19 @@ XML;
                                              ->method('create')
                                              ->with($behaviourName, $args[$i], $behaviourOptions[$i])
                                              ->will($this->returnValue($behaviour));
-                                             
+
             $nodeMock->expects($this->at($i))
                       ->method('addBehaviour')
                       ->with($behaviour);
             $behaviourFactoryCallIndex++;
         }
-                                     
+
         $this->parser->setBehaviourFactory($behaviourFactoryMock);
         $this->parser->setNodeFactory($nodeFactoryMock);
 
         $this->parser->parse($xml);
     }
-    
+
     /**
      * @test
      */
@@ -973,21 +977,21 @@ XML;
         $this->documentMock->expects($this->at(1))
                            ->method('setMetadataValue')
                            ->with('Title', 'some title');
-        
+
         $this->parser->parse($xml);
     }
-    
+
     /**
      * @test
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function throwExceptionOnParseError()
     {
-        $warningEnabled = \PHPUnit_Framework_Error_Warning::$enabled;
-        \PHPUnit_Framework_Error_Warning::$enabled = false;
-        
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
+        $errorReporting = error_reporting();
+        error_reporting($errorReporting & ~E_WARNING);
+
         $xml = <<<XML
-<pdf></pdfaa>    
+<pdf></pdfaa>
 XML;
         try
         {
@@ -995,11 +999,11 @@ XML;
         }
         catch(\Exception $e)
         {
-            \PHPUnit_Framework_Error_Warning::$enabled = $warningEnabled;
+            error_reporting($errorReporting);
             throw $e;
         }
     }
-    
+
     /**
      * @test
      */
@@ -1012,13 +1016,13 @@ XML;
 	</tag1>
 </pdf>
 XML;
-        $node1 = $this->getMock('PHPPdf\Core\Node\Container', array('setPriorityFromParent'));
-        $node2 = $this->getMock('PHPPdf\Core\Node\Container', array('setPriorityFromParent'));
-        
+        $node1 = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('setPriorityFromParent'))->getMock();
+        $node2 = $this->getMockBuilder('PHPPdf\Core\Node\Container')->setMethods(array('setPriorityFromParent'))->getMock();
+
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('tag1', $node1), array('tag2', $node2)));
-        
-        $listener = $this->getMock('PHPPdf\Core\Parser\DocumentParserListener');
-        
+
+        $listener = $this->getMockBuilder('PHPPdf\Core\Parser\DocumentParserListener')->getMock();
+
         $listener->expects($this->at(0))
                  ->method('onStartParseNode')
                  ->with($this->documentMock, $this->isInstanceOf('PHPPdf\Core\Node\PageCollection'), $node1);
@@ -1034,13 +1038,13 @@ XML;
         $listener->expects($this->at(4))
                  ->method('onEndParsing')
                  ->with($this->documentMock, $this->isInstanceOf('PHPPdf\Core\Node\PageCollection'));
-        
+
         $this->parser->setNodeFactory($nodeFactoryMock);
         $this->parser->addListener($listener);
-        
+
         $this->parser->parse($xml);
     }
-    
+
     /**
      * @test
      */
@@ -1054,11 +1058,11 @@ XML;
 
         $node = new Text();
         $paragraph = new Paragraph();
-        
+
         $nodeFactoryMock = $this->getNodeFactoryMock(array(array('paragraph', $paragraph), array('text', $node)));
-        
-        $listener = $this->getMock('PHPPdf\Core\Parser\DocumentParserListener');
-        
+
+        $listener = $this->getMockBuilder('PHPPdf\Core\Parser\DocumentParserListener')->getMock();
+
         $listener->expects($this->at(0))
                  ->method('onStartParseNode')
                  ->with($this->documentMock, $this->isInstanceOf('PHPPdf\Core\Node\PageCollection'), $paragraph);
@@ -1074,10 +1078,10 @@ XML;
         $listener->expects($this->at(4))
                  ->method('onEndParsing')
                  ->with($this->documentMock, $this->isInstanceOf('PHPPdf\Core\Node\PageCollection'));
-        
+
         $this->parser->setNodeFactory($nodeFactoryMock);
         $this->parser->addListener($listener);
-        
+
         $this->parser->parse($xml);
-    } 
+    }
 }

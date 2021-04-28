@@ -13,7 +13,7 @@ class ElasticPageFormatterTest extends TestCase
     private $document;
     private $nodeObjectMother;
     
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new ElasticPageFormatter();
         $this->document = $this->createDocumentStub();

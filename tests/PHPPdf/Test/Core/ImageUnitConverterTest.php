@@ -6,7 +6,7 @@ use PHPPdf\Core\ImageUnitConverter;
 use PHPPdf\PHPUnit\Framework\TestCase;
 
 class ImageUnitConverterTest extends TestCase
-{    
+{
     /**
      * @test
      * @dataProvider unitProvider
@@ -14,8 +14,9 @@ class ImageUnitConverterTest extends TestCase
     public function convertUnit($value, $expected, $unit = null, $dpi = 1)
     {
         $converter = new ImageUnitConverter($dpi);
-               
-        $this->assertEquals($expected, $converter->convertUnit($value, $unit), 'invalid unit conversion', 0.0001);
+
+        $result = $converter->convertUnit($value, $unit);
+        $this->assertEqualsWithDelta($expected, $result, 0.0001, 'invalid unit conversion');
     }
 
     public function unitProvider()

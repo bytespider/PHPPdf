@@ -15,7 +15,7 @@ use PHPPdf\Core\Node\Table\Row;
 
 /**
  * Table element
- * 
+ *
  * @author Piotr Śliwa <peter.pl7@gmail.com>
  */
 class Table extends Container implements Listener
@@ -29,16 +29,16 @@ class Table extends Container implements Listener
     protected static function setDefaultAttributes()
     {
         parent::setDefaultAttributes();
-        
+
         static::addAttribute('row-height');
     }
-    
+
     protected static function initializeType()
     {
         parent::initializeType();
         static::setAttributeSetters(array('row-height' => 'setRowHeight'));
     }
-    
+
     public function setRowHeight($value)
     {
         $this->setAttributeDirectly('row-height', $this->convertUnit($value));
@@ -58,7 +58,7 @@ class Table extends Container implements Listener
 
         return parent::add($node);
     }
-    
+
     private function updateColumnDataIfNecessary(Cell $cell)
     {
         $this->setColumnWidthIfNecessary($cell);
@@ -82,9 +82,10 @@ class Table extends Container implements Listener
             $realColumnNumber = $columnNumber + $i;
             $currentWidth += isset($this->widthsOfColumns[$realColumnNumber]) ? $this->widthsOfColumns[$realColumnNumber] : 0;
         }
-        
+
+        $width = (float)$width;
         $diff = ($width - $currentWidth)/$colspan;
-        
+
         if($isWidthRelative)
         {
             $diff .= '%';
@@ -95,7 +96,7 @@ class Table extends Container implements Listener
             for($i=0; $i<$colspan; $i++)
             {
                 $realColumnNumber = $columnNumber + $i;
-                
+
                 $this->widthsOfColumns[$realColumnNumber] = isset($this->widthsOfColumns[$realColumnNumber]) ? ($this->widthsOfColumns[$realColumnNumber] + $diff) : $diff;
             }
         }
@@ -168,12 +169,12 @@ class Table extends Container implements Listener
     {
         $this->widthsOfColumns = $widthsOfColumns;
     }
-    
+
     public function convertRelativeWidthsOfColumns()
     {
         $tableWidth = $this->getWidth();
         $unitConverter = $this->getUnitConverter();
-        
+
         $tableWidthMinusColumns = $tableWidth;
         $columnsWithoutWidth = array();
         array_walk($this->widthsOfColumns, function(&$width, $key, $tableWidth) use($unitConverter, &$tableWidthMinusColumns, &$columnsWithoutWidth){
@@ -187,10 +188,10 @@ class Table extends Container implements Listener
                 $tableWidthMinusColumns -= $width;
             }
         }, $tableWidth);
-        
+
         $numberOfColumnsWithoutWidth = count($columnsWithoutWidth);
         $width = $numberOfColumnsWithoutWidth ? $tableWidthMinusColumns / $numberOfColumnsWithoutWidth : 0;
-        
+
         foreach($columnsWithoutWidth as $column)
         {
             $this->widthsOfColumns[$column] = $width;
@@ -238,7 +239,7 @@ class Table extends Container implements Listener
     {
         $this->marginsOfColumns['margin-left'] = $margins;
     }
-    
+
     private function setMarginsRightOfColumns(array $margins)
     {
         $this->marginsOfColumns['margin-right'] = $margins;

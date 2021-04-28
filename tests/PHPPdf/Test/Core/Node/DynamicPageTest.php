@@ -17,7 +17,7 @@ class DynamicPageTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $page;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->page = new DynamicPage();
     }

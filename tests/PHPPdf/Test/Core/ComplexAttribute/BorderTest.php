@@ -23,10 +23,10 @@ class BorderTest extends ComplexAttributeTest
         $this->objectMother = new NodeObjectMother($this);
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->border = new Border();
-        $this->document = new Document($this->getMock('PHPPdf\Core\Engine\Engine'));
+        $this->document = new Document($this->getMockBuilder('PHPPdf\Core\Engine\Engine')->getMock());
         $this->document->setUnitConverter(new PdfUnitConverter());
     }
 
@@ -40,8 +40,7 @@ class BorderTest extends ComplexAttributeTest
         $width = 100;
         $height = 50;
 
-        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
-                       ->getMock();
+        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
         $gcMock->expects($this->once())
                  ->method('drawPolygon')
                  ->with(array(-0.5, 100, 100, 0, 0), array(100, 100, 50, 50, 100.5), GraphicsContext::SHAPE_DRAW_STROKE);
@@ -82,14 +81,13 @@ class BorderTest extends ComplexAttributeTest
      */
     public function drawingPartialBorder()
     {
-        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
-			   ->getMock();
+        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
 
         //at(0) and at(1) for setLineDashingPattern and setLineWidth
         $gcMock->expects($this->at(2))
                ->method('drawLine')
                ->with(-0.5, 100, 50.5, 100);
-        
+
         $gcMock->expects($this->at(3))
                ->method('drawLine')
                ->with(50.5, 50, -0.5, 50);
@@ -110,28 +108,27 @@ class BorderTest extends ComplexAttributeTest
                          ->setMethods(array('convertUnit'))
                          ->disableOriginalConstructor()
                          ->getMock();
-        
+
         $actualSize = '12px';
         $expectedSize = 2;
-        
+
         $document->expects($this->at(0))
                  ->method('convertUnit')
                  ->with($actualSize)
                  ->will($this->returnValue($expectedSize));
-                 
+
         //position conversion
         $document->expects($this->at(1))
                  ->method('convertUnit')
                  ->with(0)
                  ->will($this->returnValue(0));
 
-        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
-        			   ->getMock();
+        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
 
         $gcMock->expects($this->once())
                ->method('setLineWidth')
                ->with($expectedSize);
-        
+
         $gcMock->expects($this->once())
                ->method('drawLine')
                ->with(0, 2, 0, 11);
@@ -150,8 +147,7 @@ class BorderTest extends ComplexAttributeTest
     {
         $radius = 50;
 
-        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
-                       ->getMock();
+        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
         $gcMock->expects($this->once())
                ->method('drawRoundedRectangle')
                ->with(0, 70, 50, 100, $radius, GraphicsContext::SHAPE_DRAW_STROKE);
@@ -189,8 +185,7 @@ class BorderTest extends ComplexAttributeTest
      */
     public function borderStyle($style)
     {
-        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
-        			   ->getMock();
+        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
 
         $gcMock->expects($this->at(0))
                ->method('setLineDashingPattern')
@@ -237,10 +232,10 @@ class BorderTest extends ComplexAttributeTest
 
     /**
      * @test
-     * @expectedException \InvalidArgumentException
      */
     public function throwExceptionIfBorderStyleIsInvalid()
     {
+        $this->expectException(\InvalidArgumentException::class);
         new Border(null, Border::TYPE_LEFT, 1, null, 'invalid_style');
     }
 
@@ -256,12 +251,12 @@ class BorderTest extends ComplexAttributeTest
         $actualPosition = '12px';
         $expectedPosition = 2;
         $size = 1;
-        
+
         $document = $this->getMockBuilder('PHPPdf\Core\Document')
                          ->setMethods(array('convertUnit'))
                          ->disableOriginalConstructor()
                          ->getMock();
-                         
+
         //size conversion
         $document->expects($this->at(0))
                  ->method('convertUnit')
@@ -271,11 +266,10 @@ class BorderTest extends ComplexAttributeTest
                  ->method('convertUnit')
                  ->with($actualPosition)
                  ->will($this->returnValue($expectedPosition));
-        
+
         $border = new Border(null, Border::TYPE_ALL, $size, null, Border::STYLE_SOLID, $actualPosition);
 
-        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
-                       ->getMock();
+        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
 
         $nodeMock = $this->objectMother->getNodeMock($x, $y, $width, $height, $gcMock);
         $halfSize = $size/2;
@@ -303,12 +297,12 @@ class BorderTest extends ComplexAttributeTest
         $expectedPosition = 2;
         $size = 1;
         $halfSize = $size/2;
-        
+
         $document = $this->getMockBuilder('PHPPdf\Core\Document')
                          ->setMethods(array('convertUnit'))
                          ->disableOriginalConstructor()
                          ->getMock();
-                         
+
         //size conversion
         $document->expects($this->at(0))
                  ->method('convertUnit')
@@ -321,8 +315,7 @@ class BorderTest extends ComplexAttributeTest
 
         $border = new Border(null, $type, $size, null, Border::STYLE_SOLID, $actualPosition);
 
-        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
-        			   ->getMock();
+        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
 
         $nodeMock = $this->objectMother->getNodeMock($x, $y, $width, $height, $gcMock);
 
@@ -332,7 +325,7 @@ class BorderTest extends ComplexAttributeTest
 
         $border->enhance($nodeMock, $document);
     }
-    
+
     /**
      * @test
      * @dataProvider typeProvider
@@ -340,10 +333,10 @@ class BorderTest extends ComplexAttributeTest
     public function borderWithNoneAsTypeIsEmpty($type, $expectedEmpty)
     {
         $border = new Border(null, $type);
-        
+
         $this->assertEquals($expectedEmpty, $border->isEmpty());
     }
-    
+
     public function typeProvider()
     {
         return array(
@@ -352,7 +345,7 @@ class BorderTest extends ComplexAttributeTest
             array(Border::TYPE_LEFT, false),
         );
     }
-    
+
     /**
      * @test
      */
@@ -360,33 +353,33 @@ class BorderTest extends ComplexAttributeTest
     {
         $color = 'color';
         $expectedColor = '#123123';
-        
+
         $border = new Border($color);
-        
-        $gcMock = $this->getMock('PHPPdf\Core\Engine\GraphicsContext');
-        
+
+        $gcMock = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
+
         $document = $this->getMockBuilder('PHPPdf\Core\Document')
                          ->setMethods(array('getColorFromPalette'))
                          ->disableOriginalConstructor()
                          ->getMock();
-                         
+
         $document->expects($this->once())
                  ->method('getColorFromPalette')
                  ->with($color)
                  ->will($this->returnValue($expectedColor));
-        
+
         foreach(array('setLineColor', 'setFillColor') as $method)
         {
             $gcMock->expects($this->once())
                    ->method($method)
                    ->with($expectedColor);
         }
-        
+
         $nodeMock = $this->objectMother->getNodeMock(0, 0, 100, 100, $gcMock);
-        
+
         $border->enhance($nodeMock, $document);
     }
-    
+
     /**
      * @test
      */
@@ -396,7 +389,7 @@ class BorderTest extends ComplexAttributeTest
         $radius = 100;
         $centerPoint = Point::getInstance(100, 100);
         $background = new Border('#ffffff');
-        
-        $this->assertDrawCircle($background, $color, $radius, $centerPoint, GraphicsContext::SHAPE_DRAW_STROKE);       
+
+        $this->assertDrawCircle($background, $color, $radius, $centerPoint, GraphicsContext::SHAPE_DRAW_STROKE);
     }
 }

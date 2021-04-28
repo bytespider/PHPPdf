@@ -13,7 +13,7 @@ class ImageRatioFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $formatter;
     private $document;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new ImageRatioFormatter();
         $this->document = $this->createDocumentStub();

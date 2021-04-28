@@ -19,7 +19,7 @@ use PHPPdf\Core\Node\Page,
 class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     const PAGE_HEIGHT = 100;
-    
+
     private $node;
     private $objectMother;
 
@@ -27,18 +27,18 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $this->objectMother = new NodeObjectMother($this);
     }
-    
-    public function setUp()
+
+    public function setUp(): void
     {
         $this->node = new StubNode();
     }
 
     /**
      * @test
-     * @expectedException PHPPdf\Core\Exception\InvalidAttributeException
      */
     public function failureSettingAttribute()
     {
+        $this->expectException(\PHPPdf\Core\Exception\InvalidAttributeException::class);
         $this->node->setAttribute('someName', 'someValue');
     }
 
@@ -200,7 +200,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->assertEquals(30, $result->getHeight());
         $this->assertEquals(array(70, -30), $result->getEndDrawingPoint());
     }
-    
+
     /**
      * @test
      */
@@ -210,19 +210,19 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $y = 500;
         $height = 600;
         $width = 300;
-        
+
         $boundary = $this->objectMother->getBoundaryStub($x, $y, $width, $height);
-        
+
         $this->invokeMethod($this->node, 'setBoundary', array($boundary));
         $this->node->setWidth($width);
         $this->node->setHeight($height);
         $this->node->setAttribute('breakable', false);
-        
+
         $page = new Page(array('page-size' => $width.':'.($height/2)));
         $page->add($this->node);
-        
+
         $newNode = $this->node->breakAt(500);
-        
+
         $this->assertNotNull($newNode);
     }
 
@@ -283,7 +283,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
     public function marginAndPaddingAsPseudoAttribute($attribute, $value, $expectedTop, $expectedRight, $expectedBottom, $expectedLeft)
     {
         $this->node->setAttribute($attribute, $value);
-        
+
         $this->assertEquals($expectedTop, $this->node->getAttribute($attribute.'-top'));
         $this->assertEquals($expectedRight, $this->node->getAttribute($attribute.'-right'));
         $this->assertEquals($expectedBottom, $this->node->getAttribute($attribute.'-bottom'));
@@ -312,11 +312,11 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException \InvalidArgumentException
      */
     public function throwExceptionIfNotExistedPlaceholderIsSet()
     {
-        $this->node->setPlaceholder('name', $this->getMock('PHPPdf\Core\Node\Container'));
+        $this->expectException(\InvalidArgumentException::class);
+        $this->node->setPlaceholder('name', $this->getMockBuilder('PHPPdf\Core\Node\Container')->getMock());
     }
 
     /**
@@ -324,7 +324,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
      */
     public function gettingBoundaryPoints()
     {
-        $boundary = $this->getMock('PHPPdf\Core\Boundary', array('getFirstPoint', 'getDiagonalPoint'));
+        $boundary = $this->getMockBuilder('PHPPdf\Core\Boundary')->setMethods(array('getFirstPoint', 'getDiagonalPoint'))->getMock();
         $boundary->expects($this->once())
                  ->id('first-point')
                  ->method('getFirstPoint')
@@ -386,7 +386,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
                              ->disableOriginalConstructor()
                              ->getMock();
 
-        $formatterMock = $this->getMock('PHPPdf\Core\Formatter\Formatter', array('format'));
+        $formatterMock = $this->getMockBuilder('PHPPdf\Core\Formatter\Formatter')->setMethods(array('format'))->getMock();
         $formatterMock->expects($this->once())
                       ->method('format')
                       ->with($this->node, $documentMock);
@@ -414,7 +414,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $this->assertEquals('100%', $this->node->getRelativeWidth());
     }
-    
+
     /**
      * @test
      */
@@ -440,33 +440,33 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array('breakable', '0', false),
             array('breakable', 'no', false),
         );
-        
+
         foreach($testData as $data)
         {
             list($attributeName, $attributeValue, $expectedValue) = $data;
-            
+
             $this->node->setAttribute($attributeName, $attributeValue);
-        
+
             $this->assertTrue($expectedValue === $this->node->getAttribute($attributeName));
-        }    
+        }
     }
-    
+
     /**
      * @test
      */
     public function getEncodingIsDelegatedToPage()
     {
         $encoding = 'some-encoding';
-        $page = $this->getMock('PHPPdf\Core\Node\Page', array('getAttributeDirectly'));
+        $page = $this->getMockBuilder('PHPPdf\Core\Node\Page')->setMethods(array('getAttributeDirectly'))->getMock();
         $page->expects($this->once())
              ->method('getAttributeDirectly')
              ->will($this->returnValue($encoding));
-        
+
         $this->node->setParent($page);
 
         $this->assertEquals($encoding, $this->node->getEncoding());
     }
-    
+
     /**
      * @test
      * @dataProvider breakableProvider
@@ -480,14 +480,14 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $page->expects($this->atLeastOnce())
              ->method('getHeight')
              ->will($this->returnValue($pageHeight));
-             
+
         $this->node->setParent($page);
         $this->node->setBreakable($breakable);
         $this->node->setHeight($nodeHeight);
-        
+
         $this->assertEquals($expectedBreakable, $this->node->isBreakable());
     }
-    
+
     public function breakableProvider()
     {
         return array(
@@ -501,7 +501,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
             ),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider complexAttributeStubsProvider
@@ -510,17 +510,17 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $page = new Page();
         $page->add($this->node);
-        
+
         $document = $this->getMockBuilder('PHPPdf\Core\Document')
                          ->setMethods(array('getComplexAttributes'))
                          ->disableOriginalConstructor()
                          ->getMock();
         $bag = $this->getMockBuilder('PHPPdf\Core\AttributeBag')
                     ->getMock();
-                         
-                         
+
+
         $this->invokeMethod($this->node, 'setComplexAttributeBag', array($bag));
-        
+
         $document->expects($this->once())
                  ->method('getComplexAttributes')
                  ->with($bag)
@@ -528,10 +528,10 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
         $drawingTasks = new DrawingTaskHeap();
         $this->node->collectOrderedDrawingTasks($document, $drawingTasks);
-        
+
         $this->assertEquals(count($complexAttributeStubs), count($drawingTasks));
     }
-    
+
     public function complexAttributeStubsProvider()
     {
         return array(
@@ -543,7 +543,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
             ),
         );
     }
-    
+
     /**
      * @test
      */
@@ -551,11 +551,11 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $gc = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')
                    ->getMock();
-                   
+
         $page = new Page();
         $this->invokeMethod($page, 'setGraphicsContext', array($gc));
         $page->add($this->node);
-        
+
         for($i=0; $i<2; $i++)
         {
             $behaviour = $this->getMockBuilder('PHPPdf\Core\Node\Behaviour\Behaviour')
@@ -567,16 +567,16 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
                       ;
             $this->node->addBehaviour($behaviour);
         }
-        
+
         $tasks = new DrawingTaskHeap();
         $this->node->collectUnorderedDrawingTasks($this->createDocumentStub(), $tasks);
-        
+
         foreach($tasks as $task)
         {
             $task->invoke();
         }
     }
-    
+
     /**
      * @test
      * @dataProvider rotationProvider
@@ -587,7 +587,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $parent = new Container();
         $parent->setAttribute('rotate', $parentRotation);
         $parent->add($this->node);
-        
+
         switch($expected)
         {
             case 'node':
@@ -599,12 +599,12 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
             default:
                 $expectedNode = false;
         }
-        
+
         $actualNode = $this->node->getAncestorWithRotation();
-        
+
         $this->assertTrue($expectedNode === $actualNode);
     }
-    
+
     public function rotationProvider()
     {
         return array(
@@ -614,7 +614,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(null, 0.5, 'parent'),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider calculateDiagonallyRotationProvider
@@ -623,12 +623,12 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $page = new Page(array('page-size' => $width.':'.$height));
         $page->add($this->node);
-        
+
         $this->node->setAttribute('rotate', $rotate);
-        
-        $this->assertEquals($expectedRadians, $this->node->getRotate(), 'diagonally rotate dosn\'t match', 0.001);
+
+        $this->assertEqualsWithDelta($expectedRadians, $this->node->getRotate(), 0.001, 'diagonally rotate dosn\'t match');
     }
-    
+
     public function calculateDiagonallyRotationProvider()
     {
         return array(
@@ -637,7 +637,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(Node::ROTATE_OPPOSITE_DIAGONALLY, 100, 100, -pi()/4),
         );
     }
-    
+
     /**
      * @test
      */
@@ -656,16 +656,16 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
                   ->method('convertUnit')
                   ->with($actual)
                   ->will($this->returnValue($expected));
-                         
+
         $this->node->setUnitConverter($converter);
-        
+
         $this->node->setAttribute('line-height', $actual);
         $this->node->setAttribute('padding-left', $actual);
-        
+
         $this->assertEquals($expected, $this->node->getAttribute('line-height'));
         $this->assertEquals($expected, $this->node->getAttribute('padding-left'));
     }
-    
+
     /**
      * @test
      * @dataProvider positionProvider
@@ -675,13 +675,13 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $grandparent = new Container();
         $parent = new Container();
         $grandparent->add($parent);
-        
+
         $parent->add($this->node);
-        
+
         $grandparent->setAttribute('position', $position);
-        
+
         $actualAncestor = $this->node->getClosestAncestorWithPosition();
-        
+
         if($expectedFalse)
         {
             $this->assertFalse($actualAncestor);
@@ -691,7 +691,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
             $this->assertEquals($grandparent, $actualAncestor);
         }
     }
-    
+
     public function positionProvider()
     {
         return array(
@@ -706,7 +706,7 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
             ),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider getsPositionTranslationProvider
@@ -716,10 +716,10 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $this->node->setAttribute('position', $position);
         $this->node->setAttribute('left', $positionPoint[0]);
         $this->node->setAttribute('top', $positionPoint[1]);
-        
+
         $boundary = $this->objectMother->getBoundaryStub($firstPoint[0], $firstPoint[1], 100, 100);
         $this->writeAttribute($this->node, 'boundary', $boundary);
-        
+
         $parent = $this->getMockBuilder('PHPPdf\Core\Node\Container')
                        ->setMethods(array('getPositionTranslation'))
                        ->getMock();
@@ -727,21 +727,21 @@ class NodeTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $parent->expects($this->any())
                ->method('getPositionTranslation')
                ->will($this->returnValue(Point::getInstance($parentPositionTranslation[0], $parentPositionTranslation[1])));
-               
+
         $parentBoundary = $this->objectMother->getBoundaryStub($parentFirstPoint[0], $parentFirstPoint[1], 100, 100);
         $this->writeAttribute($parent, 'boundary', $parentBoundary);
 
         $this->node->setParent($parent);
-        
+
         $page = new Page();
         $page->setHeight(self::PAGE_HEIGHT);
         $parent->setParent($page);
-        
+
         $expectedPositionTranslation = Point::getInstance($expectedPositionTranslation[0], $expectedPositionTranslation[1]);
-        
+
         $this->assertEquals($expectedPositionTranslation, $this->node->getPositionTranslation());
     }
-    
+
     public function getsPositionTranslationProvider()
     {
         return array(

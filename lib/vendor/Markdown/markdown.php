@@ -296,7 +296,7 @@ class Markdown_Parser {
 		$in_anchor = false;
 	}
 
-	function teardown() {
+	function tearDown(): void {
 	#
 	# Called after the transformation process to clear any variable
 	# which may be taking up memory unnecessarly.
@@ -1753,7 +1753,7 @@ class MarkdownExtra_Parser extends Markdown_Parser {
 		}
 	}
 
-	function teardown() {
+	function tearDown(): void {
 	#
 	# Clearing Extra-specific variables.
 	#

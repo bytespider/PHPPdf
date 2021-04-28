@@ -16,7 +16,7 @@ class PdfUnitConverterTest extends TestCase
         $converter = new PdfUnitConverter();
         $this->assertEquals($expected, $converter->convertPercentageValue($percent, $value));
     }
-    
+
     public function percentageValuesProvider()
     {
         return array(
@@ -25,7 +25,7 @@ class PdfUnitConverterTest extends TestCase
             array('50%', 30, 15),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider unitProvider
@@ -33,8 +33,8 @@ class PdfUnitConverterTest extends TestCase
     public function convertUnit($value, $expected, $unit = null, $dpi = 1)
     {
         $converter = new PdfUnitConverter($dpi);
-        
-        $this->assertEquals($expected, $converter->convertUnit($value, $unit), 'invalid unit conversion', 0.001);
+
+        $this->assertEqualsWithDelta($expected, $converter->convertUnit($value, $unit), 0.001, 'invalid unit conversion');
     }
 
     public function unitProvider()
@@ -54,21 +54,21 @@ class PdfUnitConverterTest extends TestCase
             array('22%', '22%', null, 123),
         );
     }
-    
+
     /**
      * @test
      * @dataProvider dpiProvider
      */
-    public function dpiMustBePositiveInteger($dpi, $expectedException)
+    public function dpiMustBePositiveInteger($dpi, $expectException)
     {
-        if($expectedException)
+        if($expectException)
         {
-            $this->setExpectedException('InvalidArgumentException');
+            $this->expectException('InvalidArgumentException');
         }
-        
+
         $converter = new PdfUnitConverter($dpi);
     }
-    
+
     public function dpiProvider()
     {
         return array(

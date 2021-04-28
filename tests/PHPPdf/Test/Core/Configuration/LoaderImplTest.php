@@ -9,13 +9,15 @@ class LoaderImplTest extends \PHPPdf\PHPUnit\Framework\TestCase
     public function saveCacheIfCacheIsEmpty($file, $loaderMethodName)
     {
         $loader = new LoaderImpl();
-        
+
         $nodeFile = $this->readAttribute($loader, 'nodeFile');
         $complexAttributeFile = $this->readAttribute($loader, 'complexAttributeFile');
         $fontFile = $this->readAttribute($loader, 'fontFile');
         $colorFile = $this->readAttribute($loader, 'colorFile');
- 
-        $cache = $this->getMock('PHPPdf\Cache\NullCache', array('test', 'save'));
+
+        $cache = $this->getMockBuilder('PHPPdf\Cache\NullCache')
+                      ->setMethods(array('test', 'save'))
+                      ->getMock();
 
         $cacheId = $this->invokeMethod($loader, 'getCacheId', array($$file));
 
@@ -49,13 +51,15 @@ class LoaderImplTest extends \PHPPdf\PHPUnit\Framework\TestCase
     public function loadCacheIfCacheIsntEmpty($file, $loaderMethodName, $cacheContent)
     {
         $loader = new LoaderImpl();
-        
-        $nodeFile = $this->readAttribute($loader, 'nodeFile');
-        $complexAttributeFile = $this->readAttribute($loader, 'complexAttributeFile');
-        $fontFiles = $this->readAttribute($loader, 'fontFiles');
-        $colorFile = $this->readAttribute($loader, 'colorFile');
 
-        $cache = $this->getMock('PHPPdf\Cache\NullCache', array('test', 'save', 'load'));
+        $nodeFile = LoaderImpl::DEFAULT_NODE_FILE;
+        $complexAttributeFile = LoaderImpl::DEFAULT_COMPLEX_ATTRIBUTE_FILE;
+        $fontFiles = LoaderImpl::DEFAULT_FONT_FILES;
+        $colorFile = LoaderImpl::DEFAULT_COLOR_FILE;
+
+        $cache = $this->getMockBuilder('PHPPdf\Cache\NullCache')
+                      ->setMethods(array('test', 'save', 'load'))
+                      ->getMock();
 
         $cacheId = $this->invokeMethod($loader, 'getCacheId', array(is_array($$file) ? current($$file) : $$file));
 

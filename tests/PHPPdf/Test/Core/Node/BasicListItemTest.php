@@ -10,7 +10,7 @@ class BasicListItemTest extends \PHPPdf\PHPUnit\Framework\TestCase
     private $item;
     private $objectMother;
     
-    public function setUp()
+    public function setUp(): void
     {
         $this->item = new BasicListItem();
         $this->objectMother = new NodeObjectMother($this);

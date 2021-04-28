@@ -17,17 +17,18 @@
         }
     ],
     "require": {
-        "zendframework/zendpdf":  "~2.0.0",
-        "laminas/laminas-cache":  "^2.0"
+        "mentax/zendpdf":  "~2.0.0",
+        "laminas/laminas-cache":  "^2.0",
+        "michelf/php-markdown": "^1.9"
     },
     "require-dev": {
         "laminas/laminas-barcode": "^2.0",
         "laminas/laminas-validator": "^2.0",
         "imagine/imagine": ">=0.2.0,<0.6.0",
-        "phpunit/phpunit": ">=4,<5.4.0"
+        "phpunit/phpunit": "8.*"
     },
     "suggest": {
-    	"laminas/laminas-barcodee":  "If you want to use barcodes",
+    	"laminas/laminas-barcode":  "If you want to use barcodes",
     	"laminas/laminas-cache": "If you want to use barcodes (required by zend-barcode)",
     	"imagine/imagine": "If you want to use image generating (required version: >=v0.2.6)"
     },

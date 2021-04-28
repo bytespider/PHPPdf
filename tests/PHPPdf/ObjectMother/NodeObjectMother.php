@@ -1,15 +1,18 @@
 <?php
+declare(strict_types=1);
 
 namespace PHPPdf\ObjectMother;
 
 use PHPPdf\Core\Node\Container;
 use PHPPdf\Core\Engine\GraphicsContext;
 
+use PHPUnit\Framework\TestCase;
+
 class NodeObjectMother
 {
     private $test;
 
-    public function __construct(\PHPUnit_Framework_TestCase $test)
+    public function __construct(TestCase $test)
     {
         $this->test = $test;
     }
@@ -29,7 +32,7 @@ class NodeObjectMother
 
     public function getEmptyPageMock($graphicsContext)
     {
-        $pageMock = $this->test->getMock('PHPPdf\Core\Node\Page', array('getGraphicsContext'));
+        $pageMock = $this->test->getMockBuilder('PHPPdf\Core\Node\Page')->setMethods(array('getGraphicsContext'));
 
         $pageMock->expects($this->test->atLeastOnce())
                  ->method('getGraphicsContext')
@@ -42,7 +45,7 @@ class NodeObjectMother
     {
         $boundaryMock = $this->getBoundaryStub($x, $y, $width, $height);
 
-        $nodeMock = $this->test->getMock('PHPPdf\Core\Node\Node', array('getBoundary', 'getWidth', 'getHeight', 'getGraphicsContext'));
+        $nodeMock = $this->test->getMockBuilder('PHPPdf\Core\Node\Node')->setMethods(array('getBoundary', 'getWidth', 'getHeight', 'getGraphicsContext'))->getMock();
 
         $nodeMock->expects($this->test->atLeastOnce())
                   ->method('getBoundary')
@@ -55,7 +58,7 @@ class NodeObjectMother
         $nodeMock->expects($this->test->any())
                   ->method('getHeight')
                   ->will($this->test->returnValue($height));
-                  
+
         if($gc)
         {
             $nodeMock->expects($this->test->atLeastOnce())
@@ -78,17 +81,17 @@ class NodeObjectMother
 
         return $boundary;
     }
-    
+
     public function getNodeStub($x, $y, $width, $height)
     {
         $boundary = $this->getBoundaryStub($x, $y, $width, $height);
         $node = new Container();
-        
+
         $this->test->invokeMethod($node, 'setBoundary', array($boundary));
-        
+
         $node->setWidth($width);
         $node->setHeight($height);
-        
+
         return $node;
     }
 }

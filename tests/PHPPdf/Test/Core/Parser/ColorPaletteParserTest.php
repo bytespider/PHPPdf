@@ -9,12 +9,12 @@ use PHPPdf\PHPUnit\Framework\TestCase;
 class ColorPaletteParserTest extends TestCase
 {
     private $parser;
-    
-    public function setUp()
+
+    public function setUp(): void
     {
         $this->parser = new ColorPaletteParser();
     }
-    
+
     /**
      * @test
      */
@@ -28,7 +28,7 @@ class ColorPaletteParserTest extends TestCase
 XML;
 
         $colors = $this->parser->parse($xml);
-        
+
         $expectedColors = array(
             'blue' => '#0000ff',
             'green' => '#00ff00',
@@ -36,17 +36,17 @@ XML;
 
         $this->assertEquals($expectedColors, $colors);
     }
-    
+
     /**
      * @test
      * @dataProvider invalidXmlProvider
-     * @expectedException PHPPdf\Parser\Exception\ParseException
      */
     public function throwExceptionIfRequiredAttributesAreMissing($xml)
     {
+        $this->expectException(\PHPPdf\Parser\Exception\ParseException::class);
         $this->parser->parse($xml);
     }
-    
+
     public function invalidXmlProvider()
     {
         return array(

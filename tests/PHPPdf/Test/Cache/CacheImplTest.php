@@ -8,7 +8,7 @@ class CacheImplTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $engineMock;
 
-    public function setUp()
+    public function setUp(): void
     {
         if(!class_exists('Zend\Cache\StorageFactory', true))
         {
@@ -20,10 +20,10 @@ class CacheImplTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     /**
      * @test
-     * @expectedException \PHPPdf\Exception\RuntimeException
      */
     public function throwExceptionIfPassedCacheEngineIsUnavailable()
     {
+        $this->expectException(\PHPPdf\Exception\RuntimeException::class);
         new CacheImpl('Unexisted-cache-engine');
     }
 
@@ -42,7 +42,7 @@ class CacheImplTest extends \PHPPdf\PHPUnit\Framework\TestCase
         call_user_func_array(array($matcher, 'with'), $expectedArgs);
 
         $cache = new CacheImpl($this->engineMock, $cacheOptions);
-        
+
         $this->assertEquals($returnValue, call_user_func_array(array($cache, $method), $args));
     }
 
@@ -62,20 +62,20 @@ class CacheImplTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     private function getCacheEngineMock()
     {
-        $mock = $this->getMock('Zend\Cache\Storage\StorageInterface');
+        $mock = $this->getMockBuilder('Zend\Cache\Storage\StorageInterface')->getMock();
 
         return $mock;
     }
 
     /**
      * @test
-     * @expectedException \PHPPdf\Exception\RuntimeException
      * @dataProvider provideCacheOperations
      */
     public function wrapCacheEngineExceptions($operation, $adapterMethod, array $args)
     {
+        $this->expectException(\PHPPdf\Exception\RuntimeException::class);
         $e = new \Zend\Cache\Exception\InvalidArgumentException();
-        
+
         $this->engineMock->expects($this->once())
                          ->method($adapterMethod)
                          ->will($this->throwException($e));

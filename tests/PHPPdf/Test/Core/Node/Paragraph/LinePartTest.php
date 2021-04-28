@@ -37,13 +37,13 @@ class LinePartTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
 	    $expectedXCoord = $startPoint->getX() + self::X_TRANSLATION;
 	    $expectedYCoord = $startPoint->getY() - $fontSize - (self::LINE_HEIGHT - $lineHeightOfText);
-	    
+
 	    $expectedWordSpacing = $wordSpacing !== null ? $wordSpacing : 0;
 
-        $gc = $this->getMock('PHPPdf\Core\Engine\GraphicsContext');
+        $gc = $this->getMockBuilder('PHPPdf\Core\Engine\GraphicsContext')->getMock();
 
         $this->expectDrawText($gc, Point::getInstance($expectedXCoord, $expectedYCoord), $fontStub, $fontSize, $expectedWordSpacing);
-           
+
         if($expectedLineDecorationYCoord === false)
         {
             $gc->expects($this->never())
@@ -67,14 +67,14 @@ class LinePartTest extends \PHPPdf\PHPUnit\Framework\TestCase
         ));
 
         $line = $this->createLineStub($startPoint, self::LINE_HEIGHT);
-        
+
         $linePart = new LinePart(self::WORDS, self::WIDTH, self::X_TRANSLATION, $text);
         $linePart->setWordSpacing($wordSpacing);
         $linePart->setLine($line);
-        
+
         $tasks = new DrawingTaskHeap();
         $linePart->collectOrderedDrawingTasks($documentStub, $tasks);
-        
+
         foreach($tasks as $task)
         {
             $task->invoke();
@@ -143,7 +143,7 @@ class LinePartTest extends \PHPPdf\PHPUnit\Framework\TestCase
             ->method('drawLine')
             ->with($startPoint->getX(), $startPoint->getY(), $endPoint->getX(), $endPoint->getY());
     }
-    
+
     public function drawingDataProvider()
     {
         return array(
@@ -153,27 +153,27 @@ class LinePartTest extends \PHPPdf\PHPUnit\Framework\TestCase
             array(12, 15, Node::TEXT_DECORATION_OVERLINE, 11, 13),
         );
     }
-    
+
     /**
      * @test
      */
     public function heightOfLinePartIsLineHeightOfText()
     {
         $lineHeight = 123;
-        
+
         $text = $this->getMockBuilder('PHPPdf\Core\Node\Text')
                      ->setMethods(array('getLineHeightRecursively'))
                      ->getMock();
-                     
+
         $text->expects($this->once())
              ->method('getLineHeightRecursively')
              ->will($this->returnValue($lineHeight));
-        
+
         $linePart = new LinePart('', 0, 0, $text);
-        
+
         $this->assertEquals($lineHeight, $linePart->getHeight());
     }
-    
+
     /**
      * @test
      */
@@ -182,11 +182,11 @@ class LinePartTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $text = $this->getMockBuilder('PHPPdf\Core\Node\Text')
                      ->setMethods(array('addLinePart', 'removeLinePart'))
                      ->getMock();
-                     
+
         $text->expects($this->at(0))
              ->method('addLinePart')
              ->with($this->isInstanceOf('PHPPdf\Core\Node\Paragraph\LinePart'));
-             
+
         $text->expects($this->at(1))
              ->method('removeLinePart')
              ->with($this->isInstanceOf('PHPPdf\Core\Node\Paragraph\LinePart'));
@@ -199,10 +199,10 @@ class LinePartTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $newText->expects($this->at(0))
                 ->method('addLinePart')
                 ->with($this->isInstanceOf('PHPPdf\Core\Node\Paragraph\LinePart'));
-                
+
         $linePart->setText($newText);
     }
-    
+
     /**
      * @test
      */
@@ -210,13 +210,13 @@ class LinePartTest extends \PHPPdf\PHPUnit\Framework\TestCase
     {
         $words = 'some words';
         $linePart = new LinePart($words, 0, 0, new Text());
-        
+
         $this->assertEquals(2, $linePart->getNumberOfWords());
-        
+
         $linePart->setWords('some more words');
         $this->assertEquals(3, $linePart->getNumberOfWords());
     }
-    
+
     /**
      * @test
      */
@@ -225,10 +225,10 @@ class LinePartTest extends \PHPPdf\PHPUnit\Framework\TestCase
         $words = 'some more words';
         $width = 100;
         $linePart = new LinePart($words, $width, 0, new Text());
-        
+
         $wordSpacing = 5;
         $linePart->setWordSpacing($wordSpacing);
-        
+
         $expectedWidth = $width + ($linePart->getNumberOfWords()-1)*$wordSpacing;
         $this->assertEquals($expectedWidth, $linePart->getWidth());
     }

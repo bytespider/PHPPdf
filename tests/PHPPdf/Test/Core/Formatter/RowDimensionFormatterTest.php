@@ -10,7 +10,7 @@ class RowDimensionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 {
     private $formatter;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->formatter = new RowDimensionFormatter();
     }
@@ -40,7 +40,7 @@ class RowDimensionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     private function getBoundaryMockWithEnlargeAsserts($enlargeBy)
     {
-        $boundary = $this->getMock('PHPPdf\Core\Boundary', array('pointTranslate'));
+        $boundary = $this->getMockBuilder('PHPPdf\Core\Boundary')->setMethods(array('pointTranslate'))->getMock();
         $boundary->expects($this->at(0))
                  ->method('pointTranslate')
                  ->with(2, 0, $enlargeBy)
@@ -54,7 +54,7 @@ class RowDimensionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
 
     private function getRowMockWithHeightAsserts($boundary, $oldHeight, $maxHeightOfCells, $expectedNewHeight = null)
     {
-        $row = $this->getMock('PHPPdf\Core\Node\Table\Row', array('getBoundary', 'getHeight', 'setHeight', 'getMaxHeightOfCells', 'getChildren', 'getMarginsBottomOfCells', 'getMarginsTopOfCells'));
+        $row = $this->getMockBuilder('PHPPdf\Core\Node\Table\Row')->setMethods(array('getBoundary', 'getHeight', 'setHeight', 'getMaxHeightOfCells', 'getChildren', 'getMarginsBottomOfCells', 'getMarginsTopOfCells'))->getMock();
 
         $expectedNewHeight = $expectedNewHeight === null ? $maxHeightOfCells : $expectedNewHeight;
 
@@ -88,7 +88,7 @@ class RowDimensionFormatterTest extends \PHPPdf\PHPUnit\Framework\TestCase
         {
             $boundary = $this->getBoundaryMockWithEnlargeAsserts($rowHeight - $height);
 
-            $cell = $this->getMock('PHPPdf\Core\Node\Table\Cell', array('getHeight', 'setHeight', 'getBoundary'));
+            $cell = $this->getMockBuilder('PHPPdf\Core\Node\Table\Cell')->setMethods(array('getHeight', 'setHeight', 'getBoundary'))->getMock();
 
             $cell->expects($this->atLeastOnce())
                  ->method('getBoundary')
